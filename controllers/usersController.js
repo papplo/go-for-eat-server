@@ -1,8 +1,8 @@
 'use strict';
-const config = require('../config.js');
 const monk = require('monk');
 const axios = require('axios');
 const db = monk('localhost/wallto_db');
+const config = require('../config.js');
 const filterProps = require('../services/utils').filterProps;
 
 const User = db.get('users');

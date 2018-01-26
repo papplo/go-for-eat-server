@@ -1,6 +1,6 @@
 module.exports = {
   facebook: {
-    clientId: '1537395802982279',
+    clientId: '442248476177832',
     clientSecret: '28c758a77d1b3d6cf88f9a53fe55d8f1',
     validateUrl: 'https://graph.facebook.com/me',
     fields: '?fields=id,name,email,picture,birthday,gender'
