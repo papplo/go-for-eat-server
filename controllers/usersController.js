@@ -86,11 +86,27 @@ module.exports.auth = async (ctx, next) => {
 
 module.exports.logout = async (ctx, next) => {
   if ('GET' != ctx.method) return await next();
-  ctx.status = 201;
+  ctx.status = 200;
 };
 
 module.exports.me = async (ctx, next) => {
   if ('GET' != ctx.method) return await next();
+  ctx.status = 200;
   ctx.body = ctx.user;
 };
 
+module.exports.edit = async (ctx, next) => {
+  if ('PUT' != ctx.method) return await next();
+  try {
+    await User.update({_id: ctx.user._id}, ctx.request.body.edit);
+    // the recived object should be like this:
+    // ctx.request.body.edit =
+    // {
+    //   'preferences': [tennis , video games, food],
+    //   'description': 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.'
+    // }
+    return User.findOne({_id: ctx.user._id});
+  } catch(e) { console.error('User.update', e); }
+  ctx.status = 200;
+  ctx.body = ctx.user;
+};
