@@ -1,7 +1,7 @@
 'use strict';
 const monk = require('monk');
 const axios = require('axios');
-const db = monk('localhost/wallto_db');
+const db = monk('localhost/go4eat_db');
 const config = require('../config.js');
 const filterProps = require('../services/utils').filterProps;
 
@@ -19,9 +19,9 @@ const userDB = async (userData) => {
   } else {
     try {
       await User.update({email: userData.email}, {
-        'name': userData.name, 
-        'email': userData.email, 
-        'accessToken': userData.accessToken, 
+        'name': userData.name,
+        'email': userData.email,
+        'accessToken': userData.accessToken,
         'profile_picture': userData.profile_picture
       });
       // console.log('update user');
@@ -109,11 +109,10 @@ module.exports.rating = async (ctx, next) => {
     await User.update({_id: user_to_rate},
       {
         'rating': {
-          'user_id': userData.email, 
-          'value': userData.accessToken, 
+          'user_id': userData.email,
+          'value': userData.accessToken,
           'profile_picture': userData.profile_picture
         },
-        
       });
   } catch(e) { console.error('Rating user error', e); }
   ctx.status = 200;

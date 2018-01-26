@@ -2,8 +2,6 @@
 
 const usersController = require('./controllers/usersController');
 const eventsController = require('./controllers/eventsController');
-const ratingController = require('./controllers/ratingController');
-const restaurntsController = require('./controllers/restaurntsController');
 
 const router = require('koa-router')();
 
@@ -28,9 +26,9 @@ const routes = function (app) {
     .put('/api/v1/event/:id', authorize, eventsController.editEvent)
     .delete('/api/v1/event/:id', authorize, eventsController.deleteEvent)
     .get('/api/v1/event/:id', authorize, eventsController.getEvent)
-    .post('/api/v1/event/:id/join', authorize, eventsController.joinEvent)
-    .post('/api/v1/event/:id/leave', authorize, eventsController.leaveEvent)
-    .get('/api/v1/events/:latlng/:from/:to', authorize, eventsController.getEvents)
+    .put('/api/v1/event/:id/users', authorize, eventsController.joinEvent)
+    .delete('/api/v1/event/:id/users', authorize, eventsController.leaveEvent)
+    .get('/api/v1/events', authorize, eventsController.getEvents)
 
     .options('/', options)
     .trace('/', trace)
