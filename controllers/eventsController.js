@@ -55,8 +55,9 @@ module.exports.editEvent = async (ctx, next) => {
       }
     } catch (e) { console.log('Modify create error: ', e) };
     ctx.status = 204;
+  } else {
+    ctx.status = 404; 
   }
-  ctx.status = 404;
 };
 
 // Delete event
@@ -65,7 +66,7 @@ module.exports.editEvent = async (ctx, next) => {
 // TODO: is correct ctx.params ?
 module.exports.deleteEvent = async (ctx, next) => {
   if ('DELETE' != ctx.method) return await next();
-  const event = await Events.findOne({ event_id: ctx.params.id; });
+  const event = await Events.findOne({ event_id: ctx.params.id });
   if (event) {
     try {
       await Events.remove({event_id: ctx.params.id})
@@ -74,5 +75,20 @@ module.exports.deleteEvent = async (ctx, next) => {
     ctx.status = 410;
     ctx.body = 'The event does not exist anymore';
   }
+};
 
+// GET event informations
+
+// TODO is it Event.get ?
+module.exports.getEvent = async (ctx, next) => {
+  if ('GET' != ctx.method) return await next();
+  const event = await Events.findOne({ event_id: ctx.params.id });
+  if (event) {
+    ctx.status = 200;
+    ctx.body = event;
+  } else {
+    ctx.status = 404;
+    ctx.body = 'The event does not exist';
+  }
 }
+
