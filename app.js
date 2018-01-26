@@ -1,4 +1,5 @@
 'use strict';
+require('dotenv').config();
 const compress = require('koa-compress');
 const logger = require('koa-logger');
 const koa = require('koa');
@@ -7,9 +8,8 @@ const cors = require('kcors');
 const monk = require('monk');
 const app = module.exports = new koa();
 const routes = require('./router.js');
-const db = monk('localhost/go4eat');
+const db = monk(process.env.MONGOLAB_URI);
 const User = db.get('users');
-require('dotenv').config();
 
 
 // Logger
