@@ -1,26 +1,28 @@
 'use strict';
 const config = require('../config.js');
 const monk = require('monk');
-const axios = require('axios');
-const db = monk('localhost/wallto_db');
+const db = monk('localhost/go4eat_db');
 // TODO change monk endpoint
 
 const Events = db.get('events');
 
 
 // This module expects an object with all the data for creating a new event
+
+//TODO verify if value can be array
+
 module.exports.createEvent = async (ctx, next) => {
   if ('POST' != ctx.method) return await next();
   const newEvent = {
-    google_id: ctx.request.body.google_id,
     event_id: ctx.request.body.event_id,
-    venue: ctx.request.body.venue,
+    address: ctx.request.body.address,
+    place_id: ctx.request.body.place_id,
+    place_name: ctx.request.body.place_name,
+    place_address: ctx.request.body.place_address,
     lat: ctx.request.body.lat,
     long: ctx.request.body.long,
     when: ctx.request.body.when,
-    hour: ctx.request.body.hour,
-    participants: ctx.request.body.participants,
-    free_spots: ctx.request.body.free_spots
+    participants: [ctx.user._id],
   };
 
   // TODO: verify multiple insertions? what response?
@@ -55,8 +57,8 @@ module.exports.editEvent = async (ctx, next) => {
       }
     } catch (e) { console.log('Modify create error: ', e) };
     ctx.status = 204;
-  } else {
-    ctx.status = 404; 
+.
+    ctx.body = 'The event request does not exist';
   }
 };
 
