@@ -51,6 +51,6 @@ app.use(compress());
 if (!module.parent) {
   const port = process.env.PORT || 3006;
   app.listen(port);
-  eslint-disable-next-line
+  // eslint-disable-next-line
   console.log('Listening to %s', port);
 }

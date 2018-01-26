@@ -1,4 +1,5 @@
 'use strict';
+
 const config = require('../config.js');
 const monk = require('monk');
 const db = monk('localhost/go4eat_db');
@@ -93,4 +94,3 @@ module.exports.getEvent = async (ctx, next) => {
     ctx.body = 'The event does not exist';
   }
 }
-
