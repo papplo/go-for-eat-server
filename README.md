@@ -1,12 +1,14 @@
-# Go-4-eat-server
+# Go 4 Eat Server
 
 Backend source files for Go 4 Eat App
 
 This backend supports Google and Facebook OAuth2.0 authentication and provides DB for users and events
 created by the app.
 
-***
+
 ## USE
+
++ Make sure you have an instance of **MongoDB** working on your local machine or remote server.
 
 Clone and install the dependencies for the repo:
 
@@ -32,3 +34,14 @@ Change the values accordingly with yours.
 
 + [Postman collection](https://www.getpostman.com/collections/fe388c40163fa169bada)
 + [Apiary mock server APIs](https://go4eat.docs.apiary.io/#reference)
+
+## Tech Stack
+
++ **Monk** - MongoDB middleware
++ **dotenv** - Variable storing
++ **Axios** - External requests
++ **Koa** - Server middleware
+  + **Kcors** - CORS handler
+  + **Koa-bodyparser** - URI parameters parser
+  + **Koa-logger**
+  + **Koa-compress**
