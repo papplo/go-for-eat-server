@@ -58,7 +58,6 @@ module.exports.editEvent = async (ctx, next) => {
       }
     } catch (e) { console.log('Modify create error: ', e) };
     ctx.status = 204;
-.
     ctx.body = 'The event request does not exist';
   }
 };
@@ -93,4 +92,13 @@ module.exports.getEvent = async (ctx, next) => {
     ctx.status = 404;
     ctx.body = 'The event does not exist';
   }
+}
+
+module.exports.joinEvent = async (ctx, next) => {
+}
+
+module.exports.leaveEvent = async (ctx, next) => {
+}
+
+module.exports.getEvents = async (ctx, next) => {
 }
