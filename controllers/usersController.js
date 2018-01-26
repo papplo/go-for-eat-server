@@ -3,6 +3,7 @@ const config = require('../config.js');
 const monk = require('monk');
 const axios = require('axios');
 const db = monk('localhost/wallto_db');
+const filterProps = require('../services/utils').filterProps;
 
 const User = db.get('users');
 
@@ -25,7 +26,7 @@ const userDB = async (userData) => {
       });
       // console.log('update user');
       return User.findOne({email: userData.email});
-    } catch(e) { console.error('User.update', e); }
+    } catch(e) { console.error('Update user error', e); }
   }
 }
 
@@ -106,7 +107,36 @@ module.exports.edit = async (ctx, next) => {
     //   'description': 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.'
     // }
     return User.findOne({_id: ctx.user._id});
-  } catch(e) { console.error('User.update', e); }
+  } catch(e) { console.error('Edit user error', e); }
   ctx.status = 200;
   ctx.body = ctx.user;
+};
+
+module.exports.getUser = async (ctx, next) => {
+  if ('GET' != ctx.method) return await next();
+  try {
+    user = await User.findOne({_id: ctx.params.id});
+    user = filterProps(promise, ['list_id', 'text', 'date']);
+  } catch(e) { console.error('Rating user error', e); }
+  ctx.status = 200;
+  ctx.body = promise;
+};
+
+module.exports.rating = async (ctx, next) => {
+  if ('PUT' != ctx.method) return await next();
+  let rating = ctx.request.body.rating;
+  let user_to_rate = ctx.params.id;
+  try {
+    await User.update({_id: user_to_rate},
+      {
+        'rating': {
+          'user_id': userData.email, 
+          'value': userData.accessToken, 
+          'profile_picture': userData.profile_picture
+        },
+        
+      });
+  } catch(e) { console.error('Rating user error', e); }
+  ctx.status = 200;
+  ctx.body = promise;
 };
