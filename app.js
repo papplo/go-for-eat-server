@@ -9,6 +9,8 @@ const app = module.exports = new koa();
 const routes = require('./router.js');
 const db = monk('localhost/go4eat');
 const User = db.get('users');
+require('dotenv').config();
+
 
 // Logger
 app.use(logger());

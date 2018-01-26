@@ -1,7 +1,7 @@
 'use strict';
 const monk = require('monk');
 const axios = require('axios');
-const db = monk('localhost/go4eat_db');
+const db = monk(process.env.MONGOLAB_URI);
 const config = require('../config.js');
 const filterProps = require('../services/utils').filterProps;
 
