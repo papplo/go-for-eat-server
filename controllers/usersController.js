@@ -34,18 +34,20 @@ module.exports.auth = async (ctx, next) => {
   if ('POST' != ctx.method) return await next();
   if (ctx.request.body.network == 'facebook') {
     try {
-      let authResult = await axios.get(config.facebook.validateUrl, {
+      let authResult = await axios.get(config.facebook.validateUrl+config.facebook.fields, {
         headers: {
           'Authorization': 'Bearer ' + ctx.request.body.accessToken,
         }
       });
-      // console.log('authResult', authResult.data);
-      if (authResult.data.id == ctx.request.body.id) {
+      console.log('authResult', authResult);
+      if (authResult.id == ctx.request.body.id) {
         let user = {
-          'name': ctx.request.body.name,
-          'email': ctx.request.body.email,
+          'name': authResult.name,
+          'email': authResult.email,
+          'profile_picture': authResult.picture.data.url,
+          'birthday':authResult.birthday,
+          'gender': authResult.gender,
           'accessToken': 'FB' + ctx.request.body.accessToken,
-          'profile_picture': ctx.request.body.picture.data.url,
         };
         user = await userDB(user);
         console.log('user', user);
@@ -64,13 +66,15 @@ module.exports.auth = async (ctx, next) => {
           'Authorization': 'Bearer ' + ctx.request.body.accessToken,
         }
       });
-      // console.log('authResult', authResult.data);
+      console.log('authResult', authResult.data);
       if (authResult.data.sub == ctx.request.body.id) {
         let user = {
           'name': authResult.data.name,
           'email': authResult.data.email,
-          'accessToken': 'GO' + ctx.request.body.accessToken,
           'profile_picture': authResult.data.picture,
+          'birthday':authResult.data.birthday,
+          'gender': authResult.data.gender,
+          'accessToken': 'GO' + ctx.request.body.accessToken,
         };
         user = await userDB(user);
         console.log('user', user);
@@ -81,13 +85,39 @@ module.exports.auth = async (ctx, next) => {
         }
       }
     } catch(e) { console.error('Google validate error'); }
+  } if (ctx.request.body.network == 'linkedin') {
+    console.log('linkedin ctx.request.body', ctx.request.body);
   }
   ctx.status = 404;
 };
 
-module.exports.logout = async (ctx, next) => {
+module.exports.getUser = async (ctx, next) => {
   if ('GET' != ctx.method) return await next();
+  try {
+    user = await User.findOne({_id: ctx.params.id});
+    user = filterProps(user, ['_id', 'name', 'profile_picture', 'gender', 'age']);
+  } catch(e) { console.error('Get user error', e); }
   ctx.status = 200;
+  ctx.body = user;
+};
+
+module.exports.rating = async (ctx, next) => {
+  if ('PUT' != ctx.method) return await next();
+  let rating = ctx.request.body.rating;
+  let user_to_rate = ctx.params.id;
+  try {
+    await User.update({_id: user_to_rate},
+      {
+        'rating': {
+          'user_id': userData.email, 
+          'value': userData.accessToken, 
+          'profile_picture': userData.profile_picture
+        },
+        
+      });
+  } catch(e) { console.error('Rating user error', e); }
+  ctx.status = 200;
+  ctx.body = promise;
 };
 
 module.exports.me = async (ctx, next) => {
@@ -110,33 +140,4 @@ module.exports.edit = async (ctx, next) => {
   } catch(e) { console.error('Edit user error', e); }
   ctx.status = 200;
   ctx.body = ctx.user;
-};
-
-module.exports.getUser = async (ctx, next) => {
-  if ('GET' != ctx.method) return await next();
-  try {
-    user = await User.findOne({_id: ctx.params.id});
-    user = filterProps(promise, ['list_id', 'text', 'date']);
-  } catch(e) { console.error('Rating user error', e); }
-  ctx.status = 200;
-  ctx.body = promise;
-};
-
-module.exports.rating = async (ctx, next) => {
-  if ('PUT' != ctx.method) return await next();
-  let rating = ctx.request.body.rating;
-  let user_to_rate = ctx.params.id;
-  try {
-    await User.update({_id: user_to_rate},
-      {
-        'rating': {
-          'user_id': userData.email, 
-          'value': userData.accessToken, 
-          'profile_picture': userData.profile_picture
-        },
-        
-      });
-  } catch(e) { console.error('Rating user error', e); }
-  ctx.status = 200;
-  ctx.body = promise;
 };
