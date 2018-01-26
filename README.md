@@ -1,10 +1,17 @@
+<div style="text-align:center">
+
 # Go 4 Eat Server
+
 
 Backend source files for Go 4 Eat App
 
-This backend supports Google and Facebook OAuth2.0 authentication and provides DB for users and events
+
+This backend supports Google and Facebook `OAuth2.0` authentication and provides DB for users and events
 created by the app.
 
+Follows the [MVC](https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller) pattern.
+
+</div>
 
 ## USE
 
@@ -27,12 +34,13 @@ FACEBOOK_CLIENTSECRET=<Facebook client app secret>
 GOOGLE_CONSUMERKEY=<Goggle app consumer key>
 GOOGLE_CONSUMERSECRET=<Google app consumer secret>
 ```
-Change the values accordingly with yours.
+Change the values accordingly to yours.
 
 ***
 ## API tester
 
 + [Postman collection](https://www.getpostman.com/collections/fe388c40163fa169bada)
+  + Url pointing to Apiary - change accordingly
 + [Apiary mock server APIs](https://go4eat.docs.apiary.io/#reference)
 
 ## Tech Stack
