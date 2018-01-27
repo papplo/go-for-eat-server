@@ -35,16 +35,17 @@ module.exports.createEvent = async (ctx, next) => {
 // Edit event module:
 // take the complete event params from request body
 module.exports.editEvent = async (ctx, next) => {
-	if ('PUT' != ctx.method) return await next();
+  if ('PUT' != ctx.method) return await next();
+  console.log(ctx.request.body);
   try {
-    await Events.updateOne({ _id: ctx.request.body._id }), { $set: {
+    await Events.update({ _id: ctx.params.id }, { $set: {
       place_id: ctx.request.body.place_id,
       place_name: ctx.request.body.place_name,
       place_address: ctx.request.body.place_address,
       location: ctx.request.body.location,
       when: ctx.request.body.when,
-    }};
-    let event = await Events.findOne({ _id: ctx.params._id });
+    }});
+    let event = await Events.findOne({ _id: ctx.params.id });
     ctx.body = JSON.stringify({'event': event});
     ctx.status = 200;
   } catch (e) { console.log('Modify create error: ', e); }
@@ -52,6 +53,7 @@ module.exports.editEvent = async (ctx, next) => {
 
 // Delete event
 // uses the ID parsed from the uri
+// notify the others users of cancel
 module.exports.deleteEvent = async (ctx, next) => {
 	if ('DELETE' != ctx.method) return await next();
   try {
@@ -114,4 +116,8 @@ module.exports.leaveEvent = async (ctx, next) => {
 };
 
 module.exports.getEvents = async (ctx, next) => {
+  if ('GET' != ctx.method) return await next();
+  const events = await Events.find();
+  ctx.status = 200;
+  ctx.body = JSON.stringify(events);
 };
