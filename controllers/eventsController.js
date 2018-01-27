@@ -16,68 +16,48 @@ const User = db.get('users');
 module.exports.createEvent = async (ctx, next) => {
 	if ('POST' != ctx.method) return await next();
 	const newEvent = {
-		event_id: ctx.request.body.event_id,
-		address: ctx.request.body.address,
 		place_id: ctx.request.body.place_id,
 		place_name: ctx.request.body.place_name,
 		place_address: ctx.request.body.place_address,
-		lat: ctx.request.body.lat,
-		long: ctx.request.body.long,
+		location: ctx.request.body.location,
 		when: ctx.request.body.when,
-		participants: [ctx.user._id],
+		creator: ctx.user._id,
+		attendees: [ctx.user._id],
 	};
-
-	// TODO: verify multiple insertions? what response?
-
-	const event = await Events.findOne({event_id: newEvent.event_id});
-	if (!event) {
-		try {
-			return Events.insert(newEvent);
-		} catch (e) { console.log('Event create error: ', e);}
-		ctx.status = 204;
-	}
-	ctx.status = 403;
+	try {
+    const event = await Events.insert(newEvent);
+		ctx.status = 200;
+    ctx.body = JSON.stringify({'event': event});
+	} catch (e) { console.log('Event create error: ', e);}
+	ctx.status = 400;
 };
 
 // Edit event module:
 // take the complete event params from request body
 module.exports.editEvent = async (ctx, next) => {
 	if ('PUT' != ctx.method) return await next();
-	const event = await Events.findOne({ event_id: newEvent.event_id });
-	if (event) {
-		try {
-			await Events.update({ event_id: newEvent.event_id }), {
-				google_id: ctx.request.body.google_id,
-				event_id: ctx.request.body.event_id,
-				venue: ctx.request.body.venue,
-				lat: ctx.request.body.lat,
-				long: ctx.request.body.long,
-				when: ctx.request.body.when,
-				hour: ctx.request.body.hour,
-				participants: ctx.request.body.participants,
-				free_spots: ctx.request.body.free_spots
-			};
-		} catch (e) { console.log('Modify create error: ', e); }
-		ctx.status = 204;
-		ctx.body = 'The event request does not exist';
-	}
+  try {
+    await Events.updateOne({ _id: ctx.request.body._id }), { $set: {
+      place_id: ctx.request.body.place_id,
+      place_name: ctx.request.body.place_name,
+      place_address: ctx.request.body.place_address,
+      location: ctx.request.body.location,
+      when: ctx.request.body.when,
+    }};
+    let event = await Events.findOne({ _id: ctx.params._id });
+    ctx.body = JSON.stringify({'event': event});
+    ctx.status = 200;
+  } catch (e) { console.log('Modify create error: ', e); }
 };
 
 // Delete event
 // uses the ID parsed from the uri
-
-// TODO: is correct ctx.params ?
 module.exports.deleteEvent = async (ctx, next) => {
 	if ('DELETE' != ctx.method) return await next();
-	const event = await Events.findOne({ event_id: ctx.params.id });
-	if (event) {
-		try {
-			await Events.remove({event_id: ctx.params.id});
-		} catch(e) { console.log('Deleting event error: ', e);}
-	} else {
-		ctx.status = 410;
-		ctx.body = 'The event does not exist anymore';
-	}
+  try {
+    await Events.remove({ _id: ctx.params.id});
+    ctx.status = 204;
+  } catch(e) { console.log('Deleting event error: ', e);}
 };
 
 // GET event informations
@@ -85,7 +65,7 @@ module.exports.deleteEvent = async (ctx, next) => {
 // TODO is it Event.get ?
 module.exports.getEvent = async (ctx, next) => {
 	if ('GET' != ctx.method) return await next();
-	const event = await Events.findOne({ event_id: ctx.params.id });
+	const event = await Events.findOne({ _id: ctx.params.id });
 	if (event) {
 		ctx.status = 200;
 		ctx.body = event;
@@ -96,16 +76,7 @@ module.exports.getEvent = async (ctx, next) => {
 };
 
 module.exports.joinEvent = async (ctx, next) => {
-/* 	if ('PUT' != ctx.method) return await next();
-	ctx.params.id 
-	ctx.user.id
-	try {
-		await User.update({ _id: ctx.user.id }, {
-			'_events'
-		});
-		// console.log('update user');
-		return User.findOne({ email: userData.email });
-	} catch(e) { console.error('Update user error', e); }
+if ('PUT' != ctx.method) return await next();
 	try {
 		await Events.update({ email: userData.email }, {
 			'name': userData.name,
@@ -115,7 +86,7 @@ module.exports.joinEvent = async (ctx, next) => {
 		});
 		// console.log('update user');
 		return User.findOne({ email: userData.email });
-	} catch (e) { console.error('Update user error', e); } */
+	} catch (e) { console.error('Update user error', e); }
 };
 
 module.exports.leaveEvent = async (ctx, next) => {
