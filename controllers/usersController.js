@@ -40,7 +40,7 @@ module.exports.auth = async (ctx, next) => {
 					'Authorization': 'Bearer ' + ctx.request.body.accessToken,
 				}
 			});
-			console.log('authResult', authResult);
+			console.log('authResult', authResult.status);
 			if (authResult.id == ctx.request.body.id) {
 				const events = await Events.find({events: ctx.request.body.id});
 				const created_events = await Events.find({created_events: ctx.request.body.id});
