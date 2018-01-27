@@ -9,23 +9,25 @@ const User = db.get('users');
 const Events = db.get('events');
 
 const userDB = async (userData) => {
-	// console.log('userDB:', userData);
+	console.log('userDB:', userData);
 	let user = await User.findOne({email: userData.email});
 	// console.log('findOne:', user);
 	if (!user) {
 		try {
-			// console.log('new user');
+			console.log('new user');
 			return User.insert(userData);
 		} catch (e) { console.error('User.insert', e); }
 	} else {
 		try {
 			await User.update({email: userData.email}, {
 				'name': userData.name,
-				'email': userData.email,
+        'email': userData.email,
+        'profile_picture': userData.profile_picture,
+        'birthday': userData.birthday,
+        'gender': userData.gender,
 				'accessToken': userData.accessToken,
-				'profile_picture': userData.profile_picture
 			});
-			// console.log('update user');
+			console.log('update user');
 			return User.findOne({email: userData.email});
 		} catch(e) { console.error('Update user error', e); }
 	}
@@ -42,33 +44,30 @@ module.exports.auth = async (ctx, next) => {
 				}
 			});
 			console.log('authResult', authResult.status);
-			console.log('authResult.id', authResult.id);
-			console.log(ctx.request.body.id);
-			if (authResult.id == ctx.request.body.id) {
-				// const events = await Events.find({events: ctx.request.body.id});
-				// const created_events = await Events.find({created_events: ctx.request.body.id});
-				const events = {};
-				const created_events = {};
-				console.log('events', events);
+			// console.log('authResult.data', authResult.data);
+			// console.log(ctx.request.body.id);
+			if (authResult.data.id == ctx.request.body.id) {
+				const events = await Events.find({events: ctx.request.body.id});
+				const created_events = await Events.find({created_events: ctx.request.body.id});
 				let user = {
-					'name': authResult.name,
-					'email': authResult.email,
-					'profile_picture': authResult.picture.data.url,
-					'birthday':authResult.birthday,
-					'gender': authResult.gender,
+					'name': authResult.data.name,
+					'email': authResult.data.email,
+					'profile_picture': authResult.data.picture.data.url,
+					'birthday': authResult.data.birthday,
+					'gender': authResult.data.gender,
 					'events': events,
 					'created_events': created_events,
 					'accessToken': 'FB' + ctx.request.body.accessToken,
 				};
 				user = await userDB(user);
-				console.log('user', user);
+				// console.log('user', user);
 				if (user.email) {
 					ctx.status = 200;
 					ctx.body = JSON.stringify({'user': user});
 					return;
 				}
 			}
-		} catch(e) { console.error('Facebook validate error'); }
+		} catch(e) { console.error('Facebook validate error', e); }
 	} else if (ctx.request.body.network == 'google') {
 		// console.log('google ctx.request.body', ctx.request.body);
 		try {
