@@ -42,6 +42,8 @@ module.exports.auth = async (ctx, next) => {
 				}
 			});
 			console.log('authResult', authResult.status);
+			console.log('authResult.id', authResult.id);
+			console.log(ctx.request.body.id);
 			if (authResult.id == ctx.request.body.id) {
 				// const events = await Events.find({events: ctx.request.body.id});
 				// const created_events = await Events.find({created_events: ctx.request.body.id});
