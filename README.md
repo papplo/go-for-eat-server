@@ -1,16 +1,17 @@
 
-# Go 4 Eat Server
-![Go 4 Eat Logo](https://github.com/sergipt/go-for-eat-server/tree/feature/documentation/assets/logoGreenBG.png)
+<h1 align="center">Go 4 Eat Server</h1>
+<div align="center"><img src="https://github.com/sergipt/go-for-eat-server/blob/feature/documentation/assets/appIcone.png?raw=true"</div>
 
 
-<p align="center">
+
+<div align="center">
 Backend source files for Go 4 Eat App
-</p>
+</div>
 
-<p align="center">
+<div align="center">
 This backend supports Google and Facebook `OAuth2.0` authentication and provides DB for users and events
 created by the app.
-</p>
+</div>
 
 Follows the [MVC](https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller) pattern.
 
