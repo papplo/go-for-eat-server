@@ -6,6 +6,7 @@ const db = monk(process.env.MONGOLAB_URI);
 // TODO change monk endpoint
 
 const Events = db.get('events');
+const User = db.get('users');
 
 
 // This module expects an object with all the data for creating a new event
@@ -95,9 +96,31 @@ module.exports.getEvent = async (ctx, next) => {
 };
 
 module.exports.joinEvent = async (ctx, next) => {
+/* 	if ('PUT' != ctx.method) return await next();
+	ctx.params.id 
+	ctx.user.id
+	try {
+		await User.update({ _id: ctx.user.id }, {
+			'_events'
+		});
+		// console.log('update user');
+		return User.findOne({ email: userData.email });
+	} catch(e) { console.error('Update user error', e); }
+	try {
+		await Events.update({ email: userData.email }, {
+			'name': userData.name,
+			'email': userData.email,
+			'accessToken': userData.accessToken,
+			'profile_picture': userData.profile_picture
+		});
+		// console.log('update user');
+		return User.findOne({ email: userData.email });
+	} catch (e) { console.error('Update user error', e); } */
 };
 
 module.exports.leaveEvent = async (ctx, next) => {
+	if ('GET' != ctx.method) return await next();
+
 };
 
 module.exports.getEvents = async (ctx, next) => {

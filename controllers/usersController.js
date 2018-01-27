@@ -6,6 +6,7 @@ const config = require('../config.js');
 const filterProps = require('../services/utils').filterProps;
 
 const User = db.get('users');
+const Events = db.get('events');
 
 const userDB = async (userData) => {
 	// console.log('userDB:', userData);
@@ -41,12 +42,17 @@ module.exports.auth = async (ctx, next) => {
 			});
 			console.log('authResult', authResult);
 			if (authResult.id == ctx.request.body.id) {
-				let user = {
+				const events = await Events.find({events: ctx.request.body.id});
+				const created_events = await Events.find({created_events: ctx.request.body.id});
+				console.log('events', events);
+				ga -plet user = {
 					'name': authResult.name,
 					'email': authResult.email,
 					'profile_picture': authResult.picture.data.url,
 					'birthday':authResult.birthday,
 					'gender': authResult.gender,
+					'events': events,
+					'created_events': created_events,
 					'accessToken': 'FB' + ctx.request.body.accessToken,
 				};
 				user = await userDB(user);
