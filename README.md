@@ -1,11 +1,12 @@
 
-<p align="center">
 # Go 4 Eat Server
 
 
+<p align="center">
 Backend source files for Go 4 Eat App
+</p>
 
-
+<p align="center">
 This backend supports Google and Facebook `OAuth2.0` authentication and provides DB for users and events
 created by the app.
 </p>
