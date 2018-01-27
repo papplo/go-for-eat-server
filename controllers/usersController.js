@@ -33,7 +33,7 @@ const userDB = async (userData) => {
 
 module.exports.auth = async (ctx, next) => {
 	if ('POST' != ctx.method) return await next();
-	console.log('auth', ctx.requesst.body);
+	console.log('auth', ctx.request.body);
 	if (ctx.request.body.network == 'facebook') {
 		try {
 			let authResult = await axios.get(config.facebook.validateUrl+config.facebook.fields, {
