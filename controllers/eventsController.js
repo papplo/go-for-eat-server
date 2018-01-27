@@ -2,7 +2,7 @@
 
 const config = require('../config.js');
 const monk = require('monk');
-const db = monk('localhost/go4eat_db');
+const db = monk(process.env.MONGOLAB_URI);
 // TODO change monk endpoint
 
 const Events = db.get('events');
