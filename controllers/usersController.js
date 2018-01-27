@@ -45,7 +45,7 @@ module.exports.auth = async (ctx, next) => {
 				const events = await Events.find({events: ctx.request.body.id});
 				const created_events = await Events.find({created_events: ctx.request.body.id});
 				console.log('events', events);
-				ga -plet user = {
+				let user = {
 					'name': authResult.name,
 					'email': authResult.email,
 					'profile_picture': authResult.picture.data.url,
