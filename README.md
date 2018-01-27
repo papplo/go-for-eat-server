@@ -48,7 +48,7 @@ Change the values accordingly to yours.
 
 + **Monk** - MongoDB middleware
 + **dotenv** - Variable storing
-+ **Axios** - External requests
++ **Axios** - External HTTP requests
 + **Koa** - Server middleware
   + **Kcors** - CORS handler
   + **Koa-bodyparser** - URI parameters parser
