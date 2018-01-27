@@ -1,5 +1,6 @@
 
 # Go 4 Eat Server
+[logo]: ./assets/logoGreenBG.png "Go 4 Eat Logo"
 
 
 <p align="center">
