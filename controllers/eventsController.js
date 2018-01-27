@@ -77,20 +77,39 @@ module.exports.getEvent = async (ctx, next) => {
 
 module.exports.joinEvent = async (ctx, next) => {
 if ('PUT' != ctx.method) return await next();
-	try {
-		await Events.update({ email: userData.email }, {
-			'name': userData.name,
-			'email': userData.email,
-			'accessToken': userData.accessToken,
-			'profile_picture': userData.profile_picture
-		});
-		// console.log('update user');
-		return User.findOne({ email: userData.email });
-	} catch (e) { console.error('Update user error', e); }
+  const attendees = await Events.find({_id: ctx.params.id}).project({ attendees: 1 })
+  if ( attendees < 4 ) {
+    try {
+      await Events.update({ _id: ctx.params.id }, { $push:
+        {
+        'attendees': ctx.body.user_id
+      }});
+      // console.log('update user');
+      const event = await Events.findOne({ _id: ctx.params.id });
+      ctx.body = event;
+      ctx.response = 200;
+    } catch (e) { console.error('Update user error', e); }
+  } else {
+    ctx.status = 400;
+		ctx.body = 'The event is full';
+  }
 };
 
 module.exports.leaveEvent = async (ctx, next) => {
-	if ('GET' != ctx.method) return await next();
+  if ('GET' != ctx.method) return await next();
+  let attendees = await Events.find({_id: ctx.params.id});
+  let index = attendees.attendees.indexOf(ctx.user.id)
+  if (index > 1) {
+    attendees.splice(index, 1);
+    try {
+      await Events.updateOne({ _id: ctx.request.body._id }), { $set: {
+        'attendees': attendees,
+      }};
+      let event = await Events.findOne({ _id: ctx.params._id });
+      ctx.body = JSON.stringify({'event': event});
+      ctx.status = 200;
+    } catch (e) { console.log('Leave event error: ', e); }
+  };
 
 };
 
