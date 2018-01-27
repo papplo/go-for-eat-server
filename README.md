@@ -1,4 +1,3 @@
-<div style="text-align:center">
 
 # Go 4 Eat Server
 
@@ -6,12 +5,13 @@
 Backend source files for Go 4 Eat App
 
 
+<p align="center">
 This backend supports Google and Facebook `OAuth2.0` authentication and provides DB for users and events
 created by the app.
 
 Follows the [MVC](https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller) pattern.
 
-</div>
+</p>
 
 ## USE
 
