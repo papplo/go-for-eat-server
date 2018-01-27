@@ -1,6 +1,6 @@
 
 # Go 4 Eat Server
-[logo]: ./assets/logoGreenBG.png "Go 4 Eat Logo"
+![Go 4 Eat Logo]:(https://raw.githubusercontent.com/sergipt/go-for-eat-server/tree/feature/documentation/assets/logoGreenBG.png)
 
 
 <p align="center">
