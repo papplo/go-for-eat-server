@@ -79,15 +79,16 @@ module.exports.getEvent = async (ctx, next) => {
 
 module.exports.joinEvent = async (ctx, next) => {
 if ('PUT' != ctx.method) return await next();
-  const attendees = await Events.find({_id: ctx.params.id}).project({ attendees: 1 })
+  const attendees = await Events.find({_id: ctx.params.id}, { $project: { "attendees": 1 }});
+  console.log('attendees', attendees);
   if ( attendees < 4 ) {
     try {
       await Events.update({ _id: ctx.params.id }, { $push:
         {
-        'attendees': ctx.body.user_id
+        'attendees': ctx.user.id
       }});
       // console.log('update user');
-      const event = await Events.findOne({ _id: ctx.params.id });
+      const event = await Events.find({ _id: ctx.params.id });
       ctx.body = event;
       ctx.response = 200;
     } catch (e) { console.error('Update user error', e); }
