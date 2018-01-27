@@ -1,17 +1,14 @@
 
 <h1 align="center">Go 4 Eat Server</h1>
-<div align="center"><img src="https://github.com/sergipt/go-for-eat-server/blob/feature/documentation/assets/appIcone.png?raw=true"</div>
+<div align="center"><img src="https://github.com/sergipt/go-for-eat-server/blob/feature/documentation/assets/appIcone.png?raw=true">
 
 
 
-<div align="center">
 Backend source files for Go 4 Eat App
-</div>
 
-<div align="center">
 This backend supports Google and Facebook `OAuth2.0` authentication and provides DB for users and events
 created by the app.
-</div>
+
 
 Follows the [MVC](https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller) pattern.
 
@@ -38,6 +35,8 @@ GOOGLE_CONSUMERKEY=<Goggle app consumer key>
 GOOGLE_CONSUMERSECRET=<Google app consumer secret>
 ```
 Change the values accordingly to yours.
+
+</div>
 
 ***
 ## API tester
