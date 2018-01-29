@@ -61,8 +61,6 @@ module.exports.deleteEvent = async (ctx, next) => {
 };
 
 // GET event informations
-
-// TODO is it Event.get ?
 module.exports.getEvent = async (ctx, next) => {
 	if ('GET' != ctx.method) return await next();
   const event = await Events.findOne({ _id: ctx.params.id });
@@ -91,23 +89,50 @@ if ('PUT' != ctx.method) return await next();
 
 module.exports.leaveEvent = async (ctx, next) => {
   if ('DELETE' != ctx.method) return await next();
+
+  // try {
+  //   let update = await Events.update({
+  //     _id: ctx.params.id,
+  //     attendees: ctx.user._id,
+  //     'attendees.1': { $exists: true }
+  //     },
+  //     { $pull:
+  //       { attendees: ctx.user._id }
+  //     },
+  //     { $set:
+  //       { 'creator': event.creator }
+  //     }
+  //   );
+  //   event = await Events.findOne({ _id: ctx.params.id });
+  //   console.log('updated event', event);
+  //   ctx.body = JSON.stringify({'event': event});
+  //   ctx.status = 200;
+  // } catch (e) { console.log('Leave event error: ', e); }
+
+
   let event = await Events.findOne({
     _id: ctx.params.id,
     attendees: ctx.user._id,
     'attendees.1': { $exists: true }
   });
   console.log('event', event);
-  if (event.creator === ctx.user._id) event.creator = event.attendees[1];
+  // if (event.creator == ctx.user._id) {
+    event.creator = event.attendees[1];
+    // console.log('event.creator', event.creator);
+    // console.log('ctx.user._id', ctx.user._id);
+    // console.log('event.attendees[1]', event.attendees[1]);
+  // }
   try {
-    let update = await Events.update({ _id: ctx.params.id },
-      { $pull:
-        { attendees: ctx.user._id }
-      },
-      { $set:
-        { 'creator': event.creator }
+    let update = await Events.update(
+      { _id: ctx.params.id },
+      {
+        $pull:
+          { attendees: ctx.user._id },
+        $set:
+          { 'creator': event.creator }
       }
     );
-    console.log('update', update);
+    // console.log('update', update);
     event = await Events.findOne({ _id: ctx.params.id });
     console.log('updated event', event);
     ctx.body = JSON.stringify({'event': event});
