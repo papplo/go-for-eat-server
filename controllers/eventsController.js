@@ -80,19 +80,13 @@ module.exports.getEvent = async (ctx, next) => {
 
 module.exports.joinEvent = async (ctx, next) => {
 if ('PUT' != ctx.method) return await next();
-  const event = await Events.findOne({_id: ctx.params.id});
-  console.log('attendees', event.attendees);
-  if ( event.attendees.length < 4 && event.attendees.indexOf(ctx.user._id.str) === -1) {
-    // console.log('number attendees', event.attendees.length);
-    try {
-      // console.log('number attendees', ctx.user._id);
-      await Events.update({ _id: ctx.params.id }, { $push: { attendees: ctx.user._id }});
-      ctx.response = 204;
-    } catch (e) { console.error('Update user error', e); }
-  } else {
-    ctx.status = 400;
-		ctx.body = 'The event is full';
-  }
+  try {
+    await Events.update({ _id: ctx.params.id, 'attendees.3': { $exists: false } },
+      { $addToSet: { attendees: ctx.user._id }}
+    );
+    ctx.status = 204;
+    console.log( await Events.findOne({_id: ctx.params.id}));
+  } catch (e) { console.error('Update user error', e); }
 };
 
 module.exports.leaveEvent = async (ctx, next) => {
@@ -105,7 +99,7 @@ module.exports.leaveEvent = async (ctx, next) => {
   console.log('event', event);
   if (event.creator === ctx.user._id) event.creator = event.attendees[1];
   try {
-    await Events.update({ _id: ctx.params._id },
+    let update = await Events.update({ _id: ctx.params.id },
       { $pull:
         { attendees: ctx.user._id }
       },
@@ -113,6 +107,7 @@ module.exports.leaveEvent = async (ctx, next) => {
         { 'creator': event.creator }
       }
     );
+    console.log('update', update);
     event = await Events.findOne({ _id: ctx.params.id });
     console.log('updated event', event);
     ctx.body = JSON.stringify({'event': event});
@@ -122,7 +117,9 @@ module.exports.leaveEvent = async (ctx, next) => {
 
 module.exports.getEvents = async (ctx, next) => {
   if ('GET' != ctx.method) return await next();
-  const events = await Events.find();
+  const events = await Events.find(
+    {}
+  );
   ctx.status = 200;
   ctx.body = JSON.stringify(events);
 };
