@@ -3,16 +3,12 @@
 const config = require('../config.js');
 const monk = require('monk');
 const db = monk(process.env.MONGOLAB_URI);
-// TODO change monk endpoint
 
 const Events = db.get('events');
-const User = db.get('users');
+const Users = db.get('users');
 
 
 // This module expects an object with all the data for creating a new event
-
-//TODO verify if value can be array
-
 module.exports.createEvent = async (ctx, next) => {
 	if ('POST' != ctx.method) return await next();
 	const newEvent = {
@@ -45,9 +41,7 @@ module.exports.editEvent = async (ctx, next) => {
       location: ctx.request.body.location,
       when: ctx.request.body.when,
     }});
-    let event = await Events.findOne({ _id: ctx.params.id });
-    ctx.body = JSON.stringify({'event': event});
-    ctx.status = 200;
+    ctx.status = 204;
   } catch (e) { console.log('Modify create error: ', e); }
 };
 
@@ -55,11 +49,14 @@ module.exports.editEvent = async (ctx, next) => {
 // uses the ID parsed from the uri
 // notify the others users of cancel
 module.exports.deleteEvent = async (ctx, next) => {
-	if ('DELETE' != ctx.method) return await next();
-  try {
-    await Events.remove({ _id: ctx.params.id});
-    ctx.status = 204;
-  } catch(e) { console.log('Deleting event error: ', e);}
+  if ('DELETE' != ctx.method) return await next();
+  const event = await Events.findOne({ _id: ctx.params.id, creator: ctx.user.id });
+  if (event && event.attendees.lenght === 1) {
+    try {
+      await Events.remove({ _id: ctx.params.id});
+      ctx.status = 204;
+    } catch(e) { console.log('Deleting event error: ', e);}
+  }
 };
 
 // GET event informations
@@ -67,7 +64,9 @@ module.exports.deleteEvent = async (ctx, next) => {
 // TODO is it Event.get ?
 module.exports.getEvent = async (ctx, next) => {
 	if ('GET' != ctx.method) return await next();
-	const event = await Events.findOne({ _id: ctx.params.id });
+  const event = await Events.findOne({ _id: ctx.params.id });
+  const attendees_ids = event.attendees;
+  event.attendees = await Users.find({ _id: { $in: attendees_ids }}, { $project: { id: 1, name: 1, profile_picture: 1 }});
 	if (event) {
 		ctx.status = 200;
 		ctx.body = event;
@@ -79,18 +78,13 @@ module.exports.getEvent = async (ctx, next) => {
 
 module.exports.joinEvent = async (ctx, next) => {
 if ('PUT' != ctx.method) return await next();
-  const attendees = await Events.find({_id: ctx.params.id}, { $project: { "attendees": 1 }});
+  const attendees = await Events.find({_id: ctx.params.id}, { $project: { attendees: 1 }});
   console.log('attendees', attendees);
   if ( attendees < 4 ) {
     try {
-      await Events.update({ _id: ctx.params.id }, { $push:
-        {
-        'attendees': ctx.user.id
-      }});
+      await Events.update({ _id: ctx.params.id }, { $push: { attendees: ctx.user.id }});
       // console.log('update user');
-      const event = await Events.find({ _id: ctx.params.id });
-      ctx.body = event;
-      ctx.response = 200;
+      ctx.response = 204;
     } catch (e) { console.error('Update user error', e); }
   } else {
     ctx.status = 400;
@@ -100,20 +94,19 @@ if ('PUT' != ctx.method) return await next();
 
 module.exports.leaveEvent = async (ctx, next) => {
   if ('GET' != ctx.method) return await next();
-  let attendees = await Events.find({_id: ctx.params.id});
-  let index = attendees.attendees.indexOf(ctx.user.id)
-  if (index > 1) {
-    attendees.splice(index, 1);
-    try {
-      await Events.updateOne({ _id: ctx.request.body._id }), { $set: {
-        'attendees': attendees,
-      }};
-      let event = await Events.findOne({ _id: ctx.params._id });
-      ctx.body = JSON.stringify({'event': event});
-      ctx.status = 200;
-    } catch (e) { console.log('Leave event error: ', e); }
-  };
-
+  let event = await Events.find({ _id: ctx.params.id ,attendees: { $size: { $gt: 1 } } });
+  let index = event.attendees.indexOf(ctx.user.id);
+  event.attendees.splice(index, 1);
+  if (event.attendees.length == 1) event.creator = event.attendees[0];
+  try {
+    await Events.updateOne({ _id: ctx.request.body._id }), { $set: {
+      'attendees': event.attendees,
+      'creator': event.creator
+    }};
+    let event = await Events.findOne({ _id: ctx.params._id });
+    ctx.body = JSON.stringify({'event': event});
+    ctx.status = 200;
+  } catch (e) { console.log('Leave event error: ', e); }
 };
 
 module.exports.getEvents = async (ctx, next) => {

@@ -5,21 +5,24 @@ const db = monk(process.env.MONGOLAB_URI);
 const config = require('../config.js');
 const filterProps = require('../services/utils').filterProps;
 
-const User = db.get('users');
+const Users = db.get('users');
 const Events = db.get('events');
 
 const userDB = async (userData) => {
 	console.log('userDB:', userData);
-	let user = await User.findOne({email: userData.email});
+	let user = await Users.findOne({email: userData.email});
 	// console.log('findOne:', user);
 	if (!user) {
 		try {
-			// console.log('new user');
-			return User.insert(userData);
-		} catch (e) { console.error('User.insert', e); }
+      // console.log('new user');
+      userData.ratings_number = userData.ratings_average = '0';
+      userData.description = userData.profession = '';
+      userData.interests = [];
+			return Users.insert(userData);
+		} catch (e) { console.error('Users.insert', e); }
 	} else {
 		try {
-			await User.update({email: userData.email}, { $set: {
+			await Users.update({email: userData.email}, { $set: {
 				'name': userData.name,
         'email': userData.email,
         'profile_picture': userData.profile_picture,
@@ -28,7 +31,7 @@ const userDB = async (userData) => {
 				'accessToken': userData.accessToken,
 			}});
 			// console.log('update user');
-			return User.findOne({email: userData.email});
+			return Users.findOne({email: userData.email});
 		} catch(e) { console.error('Update user error', e); }
 	}
 };
@@ -102,29 +105,11 @@ module.exports.auth = async (ctx, next) => {
 module.exports.getUser = async (ctx, next) => {
 	if ('GET' != ctx.method) return await next();
 	try {
-		user = await User.findOne({_id: ctx.params.id});
-		user = filterProps(user, ['_id', 'name', 'profile_picture', 'gender', 'age']);
+		user = await Users.findOne({_id: ctx.params.id});
+		user = filterProps(user, ['_id', 'name', 'profile_picture', 'gender', 'birthday', 'ratings_number', 'ratings_average', 'interests', 'description', 'profession']);
 	} catch(e) { console.error('Get user error', e); }
 	ctx.status = 200;
 	ctx.body = user;
-};
-
-module.exports.rating = async (ctx, next) => {
-	if ('PUT' != ctx.method) return await next();
-	let rating = ctx.request.body.rating;
-	let user_to_rate = ctx.params.id;
-	try {
-		await User.update({_id: user_to_rate},
-			{
-				'rating': {
-					'user_id': userData.email,
-					'value': userData.accessToken,
-					'profile_picture': userData.profile_picture
-				},
-			});
-	} catch(e) { console.error('Rating user error', e); }
-	ctx.status = 200;
-	ctx.body = promise;
 };
 
 module.exports.me = async (ctx, next) => {
@@ -136,15 +121,14 @@ module.exports.me = async (ctx, next) => {
 module.exports.edit = async (ctx, next) => {
 	if ('PUT' != ctx.method) return await next();
 	try {
-		await User.update({_id: ctx.user._id}, ctx.request.body.edit);
+		await Users.update({_id: ctx.user._id}, ctx.request.body.edit);
 		// the recived object should be like this:
 		// ctx.request.body.edit =
 		// {
-		//   'preferences': [tennis , video games, food],
-		//   'description': 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.'
+		//   'interests': [tennis , video games, food],
+    //   'description': 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+    //   'profession': 'Full stack developer'
 		// }
-		return User.findOne({_id: ctx.user._id});
 	} catch(e) { console.error('Edit user error', e); }
-	ctx.status = 200;
-	ctx.body = ctx.user;
+	ctx.status = 204;
 };
