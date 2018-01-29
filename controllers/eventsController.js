@@ -10,7 +10,8 @@ const Users = db.get('users');
 
 // This module expects an object with all the data for creating a new event
 module.exports.createEvent = async (ctx, next) => {
-	if ('POST' != ctx.method) return await next();
+  if ('POST' != ctx.method) return await next();
+  console.log(typeof ctx.user._id);
 	const newEvent = {
 		place_id: ctx.request.body.place_id,
 		place_name: ctx.request.body.place_name,
@@ -66,7 +67,8 @@ module.exports.getEvent = async (ctx, next) => {
 	if ('GET' != ctx.method) return await next();
   const event = await Events.findOne({ _id: ctx.params.id });
   const attendees_ids = event.attendees;
-  event.attendees = await Users.find({ _id: { $in: attendees_ids }}, { $project: { id: 1, name: 1, profile_picture: 1 }});
+  console.log('attendees_ids', attendees_ids);
+  event.attendees = await Users.find({ _id: { $in: attendees_ids }}, { _id: 1, name: 1, profile_picture: 1 });
 	if (event) {
 		ctx.status = 200;
 		ctx.body = event;
@@ -80,12 +82,11 @@ module.exports.joinEvent = async (ctx, next) => {
 if ('PUT' != ctx.method) return await next();
   const event = await Events.findOne({_id: ctx.params.id});
   console.log('attendees', event.attendees);
-  if ( event.attendees.length < 4 ) {
+  if ( event.attendees.length < 4 && event.attendees.indexOf(ctx.user._id.str) === -1) {
     // console.log('number attendees', event.attendees.length);
     try {
       // console.log('number attendees', ctx.user._id);
       await Events.update({ _id: ctx.params.id }, { $push: { attendees: ctx.user._id }});
-      // console.log('update user');
       ctx.response = 204;
     } catch (e) { console.error('Update user error', e); }
   } else {
@@ -95,18 +96,25 @@ if ('PUT' != ctx.method) return await next();
 };
 
 module.exports.leaveEvent = async (ctx, next) => {
-  if ('GET' != ctx.method) return await next();
-  let event = await Events.find({ _id: ctx.params.id, attendees: { $size: { $gt: 1 } } });
+  if ('DELETE' != ctx.method) return await next();
+  let event = await Events.findOne({
+    _id: ctx.params.id,
+    attendees: ctx.user._id,
+    'attendees.1': { $exists: true }
+  });
   console.log('event', event);
-  let index = event.attendees.indexOf(ctx.user._id);
-  event.attendees.splice(index, 1);
-  if (event.attendees.length == 1) event.creator = event.attendees[0];
+  if (event.creator === ctx.user._id) event.creator = event.attendees[1];
   try {
-    await Events.updateOne({ _id: ctx.request.body._id }), { $set: {
-      'attendees': event.attendees,
-      'creator': event.creator
-    }};
-    let event = await Events.findOne({ _id: ctx.params.id });
+    await Events.update({ _id: ctx.params._id },
+      { $pull:
+        { attendees: ctx.user._id }
+      },
+      { $set:
+        { 'creator': event.creator }
+      }
+    );
+    event = await Events.findOne({ _id: ctx.params.id });
+    console.log('updated event', event);
     ctx.body = JSON.stringify({'event': event});
     ctx.status = 200;
   } catch (e) { console.log('Leave event error: ', e); }
