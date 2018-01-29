@@ -39,9 +39,9 @@ app.use(async (ctx, next) => {
 	let authorization = ctx.headers.authorization;
 	if (!authorization || authorization.split(' ')[0] != 'Bearer') return await next();
 	ctx.token = authorization.split(' ')[1];
-	console.log('authorization accessToken', ctx.token);
+	// console.log('authorization accessToken', ctx.token);
 	ctx.user = await User.findOne({accessToken: ctx.token});
-	console.log(ctx.user);
+	console.log(ctx.user.name);
 	return await next();
 });
 

@@ -50,7 +50,7 @@ module.exports.editEvent = async (ctx, next) => {
 // notify the others users of cancel
 module.exports.deleteEvent = async (ctx, next) => {
   if ('DELETE' != ctx.method) return await next();
-  const event = await Events.findOne({ _id: ctx.params.id, creator: ctx.user.id });
+  const event = await Events.findOne({ _id: ctx.params.id, creator: ctx.user._id });
   if (event && event.attendees.lenght === 1) {
     try {
       await Events.remove({ _id: ctx.params.id});
@@ -78,11 +78,13 @@ module.exports.getEvent = async (ctx, next) => {
 
 module.exports.joinEvent = async (ctx, next) => {
 if ('PUT' != ctx.method) return await next();
-  const attendees = await Events.find({_id: ctx.params.id}, { $project: { attendees: 1 }});
-  console.log('attendees', attendees);
-  if ( attendees < 4 ) {
+  const event = await Events.findOne({_id: ctx.params.id});
+  console.log('attendees', event.attendees);
+  if ( event.attendees.length < 4 ) {
+    // console.log('number attendees', event.attendees.length);
     try {
-      await Events.update({ _id: ctx.params.id }, { $push: { attendees: ctx.user.id }});
+      // console.log('number attendees', ctx.user._id);
+      await Events.update({ _id: ctx.params.id }, { $push: { attendees: ctx.user._id }});
       // console.log('update user');
       ctx.response = 204;
     } catch (e) { console.error('Update user error', e); }
@@ -94,8 +96,9 @@ if ('PUT' != ctx.method) return await next();
 
 module.exports.leaveEvent = async (ctx, next) => {
   if ('GET' != ctx.method) return await next();
-  let event = await Events.find({ _id: ctx.params.id ,attendees: { $size: { $gt: 1 } } });
-  let index = event.attendees.indexOf(ctx.user.id);
+  let event = await Events.find({ _id: ctx.params.id, attendees: { $size: { $gt: 1 } } });
+  console.log('event', event);
+  let index = event.attendees.indexOf(ctx.user._id);
   event.attendees.splice(index, 1);
   if (event.attendees.length == 1) event.creator = event.attendees[0];
   try {
@@ -103,7 +106,7 @@ module.exports.leaveEvent = async (ctx, next) => {
       'attendees': event.attendees,
       'creator': event.creator
     }};
-    let event = await Events.findOne({ _id: ctx.params._id });
+    let event = await Events.findOne({ _id: ctx.params.id });
     ctx.body = JSON.stringify({'event': event});
     ctx.status = 200;
   } catch (e) { console.log('Leave event error: ', e); }

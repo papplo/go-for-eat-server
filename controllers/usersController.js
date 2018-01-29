@@ -9,7 +9,7 @@ const Users = db.get('users');
 const Events = db.get('events');
 
 const userDB = async (userData) => {
-	console.log('userDB:', userData);
+	// console.log('userDB:', userData);
 	let user = await Users.findOne({email: userData.email});
 	// console.log('findOne:', user);
 	if (!user) {
@@ -38,7 +38,7 @@ const userDB = async (userData) => {
 
 module.exports.auth = async (ctx, next) => {
 	if ('POST' != ctx.method) return await next();
-	console.log('auth', ctx.request.body);
+  // console.log('auth', ctx.request.body);
 	if (ctx.request.body.network == 'facebook') {
 		try {
 			let authResult = await axios.get(config.facebook.validateUrl+config.facebook.fields, {
@@ -77,7 +77,7 @@ module.exports.auth = async (ctx, next) => {
 					'Authorization': 'Bearer ' + ctx.request.body.accessToken,
 				}
 			});
-			console.log('authResult', authResult.data);
+			// console.log('authResult', authResult.data);
 			if (authResult.data.sub == ctx.request.body.id) {
 				let user = {
 					'name': authResult.data.name,

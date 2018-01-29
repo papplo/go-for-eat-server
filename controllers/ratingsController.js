@@ -10,7 +10,7 @@ const Users = db.get('users');
 
 module.exports.rating = async (ctx, next) => {
 	if ('PUT' != ctx.method) return await next();
-  let rating = await Ratings.findOne({_id: ctx.params.id, author: ctx.user.id});
+  let rating = await Ratings.findOne({_id: ctx.params.id, author: ctx.user._id});
   if (!rating ) {
     try {
       await Ratings.insert({
