@@ -2,103 +2,193 @@
 
 const config = require('../config.js');
 const monk = require('monk');
-const db = monk(process.env.MONGOLAB_URI);
-// TODO change monk endpoint
 
-const Events = db.get('events');
+// from test ////////////////////////////////////////////
+
+// const createdEvent = {}
+// const eventController = new EventsController({
+//   insert: jest.fn().returnValue(() => createdEvent)
+// })
+
+// ctx = {};
+// eventController.createEvent(ctx, next);
+// ctx.body.toEqual(JSON.stringify({
+//   'event': createdEvent
+// }))
+// ctx.status.toEqual(201);
+
+/////////////////////////////////////////////////////////
 
 
-// This module expects an object with all the data for creating a new event
+class EventsController {
+  constructor(Events) {
+    this.Events = Events;
+  }
 
-//TODO verify if value can be array
+  async createEvent (ctx, next) {
+    if ('POST' != ctx.method) return await next();
+    console.log(typeof ctx.user._id);
+    const newEvent = {
+      place_id: ctx.request.body.place_id,
+      place_name: ctx.request.body.place_name,
+      place_address: ctx.request.body.place_address,
+      location: ctx.request.body.location,
+      when: ctx.request.body.when,
+      creator: ctx.user._id,
+      attendees: [ctx.user._id],
+    };
+    try {
+      const event = await this.Events.insert(newEvent);
+      ctx.status = 200;
+      ctx.body = JSON.stringify({'event': event});
+    } catch (e) { console.log('Event create error: ', e);}
+      ctx.status = 400;
+  }
 
-module.exports.createEvent = async (ctx, next) => {
-	if ('POST' != ctx.method) return await next();
-	const newEvent = {
-		event_id: ctx.request.body.event_id,
-		address: ctx.request.body.address,
-		place_id: ctx.request.body.place_id,
-		place_name: ctx.request.body.place_name,
-		place_address: ctx.request.body.place_address,
-		lat: ctx.request.body.lat,
-		long: ctx.request.body.long,
-		when: ctx.request.body.when,
-		participants: [ctx.user._id],
-	};
+ async editEvent (ctx, next) {
+    if ('PUT' != ctx.method) return await next();
+    console.log(ctx.request.body);
+    try {
+      await this.Events.update({ _id: ctx.params.id }, { $set: {
+        place_id: ctx.request.body.place_id,
+        place_name: ctx.request.body.place_name,
+        place_address: ctx.request.body.place_address,
+        location: ctx.request.body.location,
+        when: ctx.request.body.when,
+      }});
+      ctx.status = 204;
+    } catch (e) { console.log('Modify create error: ', e); }
+  };
 
-	// TODO: verify multiple insertions? what response?
+  async deleteEvent (ctx, next)  {
+    if ('DELETE' != ctx.method) return await next();
+    const event = await this.Events.findOne({ _id: ctx.params.id, creator: ctx.user._id });
+    if (event && event.attendees.lenght === 1) {
+      try {
+        await this.Events.remove({ _id: ctx.params.id});
+        ctx.status = 204;
+      } catch(e) { console.log('Deleting event error: ', e);}
+    }
+  };
 
-	const event = await Events.findOne({event_id: newEvent.event_id});
-	if (!event) {
-		try {
-			return Events.insert(newEvent);
-		} catch (e) { console.log('Event create error: ', e);}
-		ctx.status = 204;
-	}
-	ctx.status = 403;
-};
+  async getEvent (ctx, next) {
+    if ('GET' != ctx.method) return await next();
 
-// Edit event module:
-// take the complete event params from request body
-module.exports.editEvent = async (ctx, next) => {
-	if ('PUT' != ctx.method) return await next();
-	const event = await Events.findOne({ event_id: newEvent.event_id });
-	if (event) {
-		try {
-			await Events.update({ event_id: newEvent.event_id }), {
-				google_id: ctx.request.body.google_id,
-				event_id: ctx.request.body.event_id,
-				venue: ctx.request.body.venue,
-				lat: ctx.request.body.lat,
-				long: ctx.request.body.long,
-				when: ctx.request.body.when,
-				hour: ctx.request.body.hour,
-				participants: ctx.request.body.participants,
-				free_spots: ctx.request.body.free_spots
-			};
-		} catch (e) { console.log('Modify create error: ', e); }
-		ctx.status = 204;
-		ctx.body = 'The event request does not exist';
-	}
-};
+    const event = await this.Events.aggregate([
+      { $match: { _id: monk.id(ctx.params.id) } },
+      { $lookup:
+        {
+          from: "users",
+          localField: "attendees",
+          foreignField: "_id",
+          as: "attendees"
+        },
+      },
+      { $project: {
+          "attendees.email": 0,
+          "attendees.birthday": 0,
+          "attendees.gender": 0,
+          "attendees.events": 0,
+          "attendees.created_events": 0,
+          "attendees.accessToken": 0,
+          "attendees.ratings_average": 0,
+          "attendees.ratings_number": 0,
+          "attendees.profession": 0,
+          "attendees.description": 0,
+          "attendees.interests": 0
+        }
+      }
+    ]);
+    ctx.status = 200;
+    ctx.body = event;
+  };
 
-// Delete event
-// uses the ID parsed from the uri
+  async joinEvent (ctx, next) {
+    if ('PUT' != ctx.method) return await next();
+    try {
+      await this.Events.update({ _id: ctx.params.id, 'attendees.3': { $exists: false } },
+        { $addToSet: { attendees: ctx.user._id }}
+      );
+      ctx.status = 204;
+      console.log( await this.Events.findOne({_id: ctx.params.id}));
+    } catch (e) { console.error('Update user error', e); }
+  };
 
-// TODO: is correct ctx.params ?
-module.exports.deleteEvent = async (ctx, next) => {
-	if ('DELETE' != ctx.method) return await next();
-	const event = await Events.findOne({ event_id: ctx.params.id });
-	if (event) {
-		try {
-			await Events.remove({event_id: ctx.params.id});
-		} catch(e) { console.log('Deleting event error: ', e);}
-	} else {
-		ctx.status = 410;
-		ctx.body = 'The event does not exist anymore';
-	}
-};
+  async leaveEvent (ctx, next) {
+    if ('DELETE' != ctx.method) return await next();
+    let event = await this.Events.findOne({
+      _id: ctx.params.id,
+      attendees: ctx.user._id,
+      'attendees.1': { $exists: true }
+    });
+    // console.log('event', event);
+    if ( JSON.stringify(event.creator) === JSON.stringify(ctx.user._id) ) {
+      event.creator = event.attendees[1];
+      console.log('event.attendees[1]', event.attendees[1]);
+    }
+    try {
+      let update = await this.Events.update(
+        { _id: ctx.params.id },
+        {
+          $pull:
+            { attendees: ctx.user._id },
+          $set:
+            { 'creator': event.creator }
+        }
+      );
+      event = await this.Events.findOne({ _id: ctx.params.id });
+      // console.log('updated event', event);
+      ctx.body = JSON.stringify({'event': event});
+      ctx.status = 200;
+    } catch (e) { console.log('Leave event error: ', e); }
+  };
 
-// GET event informations
+  async getEvents (ctx, next) {
+    if ('GET' != ctx.method) return await next();
+    let lat = Number(ctx.request.query.lat);
+    let lng = Number(ctx.request.query.lng);
+    let distance = Number(ctx.request.query.dist) ? Number(ctx.request.query.dist) : 1000;
+    let limit = Number(ctx.request.query.limit) ? Number(ctx.request.query.limit) : 100;
+    let from = Number(ctx.request.query.from) ? Number(ctx.request.query.from) : Date.now();
+    let to = Number(ctx.request.query.to) ? Number(ctx.request.query.to) : Date.now() + 3600*24*7;
+    console.log(ctx.request.query);
+    const events = await this.Events.aggregate([
+      { $geoNear: {
+        near: { type: "Point", coordinates: [ lat, lng ] },
+        distanceField: "distance",
+        maxDistance: distance,
+        query: { when: { $gte: from , $lte: to } },
+        limit: limit,
+        spherical: true
+      }
+    },
+    { $lookup:
+      {
+        from: "users",
+        localField: "attendees",
+        foreignField: "_id",
+        as: "attendees"
+      },
+    },
+    { $project: {
+        "attendees.email": 0,
+        "attendees.birthday": 0,
+        "attendees.gender": 0,
+        "attendees.events": 0,
+        "attendees.created_events": 0,
+        "attendees.accessToken": 0,
+        "attendees.ratings_average": 0,
+        "attendees.ratings_number": 0,
+        "attendees.profession": 0,
+        "attendees.description": 0,
+        "attendees.interests": 0
+      }
+    }
+  ]);
+    console.log('events', events);
+    ctx.status = 200;
+    ctx.body = JSON.stringify(events);
+  };
+}
 
-// TODO is it Event.get ?
-module.exports.getEvent = async (ctx, next) => {
-	if ('GET' != ctx.method) return await next();
-	const event = await Events.findOne({ event_id: ctx.params.id });
-	if (event) {
-		ctx.status = 200;
-		ctx.body = event;
-	} else {
-		ctx.status = 404;
-		ctx.body = 'The event does not exist';
-	}
-};
-
-module.exports.joinEvent = async (ctx, next) => {
-};
-
-module.exports.leaveEvent = async (ctx, next) => {
-};
-
-module.exports.getEvents = async (ctx, next) => {
-};
+module.exports = EventsController;
