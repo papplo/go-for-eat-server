@@ -1,12 +1,12 @@
 'use strict';
 
 const config = require('../config.js');
+
+// Don't cancel  const monk, it's required by a function
 const monk = require('monk');
-const db = monk(process.env.MONGOLAB_URI);
 
-const Events = db.get('events');
+require('../db');
 
-Events.createIndex( { location : "2dsphere" } );
 // from test ////////////////////////////////////////////
 
 // const createdEvent = {}

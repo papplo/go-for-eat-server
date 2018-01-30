@@ -1,12 +1,10 @@
 'use strict';
-const monk = require('monk');
 const axios = require('axios');
-const db = monk(process.env.MONGOLAB_URI);
 const config = require('../config.js');
 const filterProps = require('../services/utils').filterProps;
 
-const Users = db.get('users');
-const Events = db.get('events');
+require('../db');
+
 
 const userDB = async (userData) => {
 	// console.log('userDB:', userData);
