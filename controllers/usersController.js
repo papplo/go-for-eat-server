@@ -99,17 +99,17 @@ module.exports.auth = async (ctx, next) => {
 	} if (ctx.request.body.network == 'linkedin') {
 		console.log('linkedin ctx.request.body', ctx.request.body);
 	}
-	ctx.status = 404;
+	ctx.status = 400;
 };
 
 module.exports.getUser = async (ctx, next) => {
 	if ('GET' != ctx.method) return await next();
 	try {
-		user = await Users.findOne({_id: ctx.params.id});
+    let user = await Users.findOne({_id: ctx.params.id});
 		user = filterProps(user, ['_id', 'name', 'profile_picture', 'gender', 'birthday', 'ratings_number', 'ratings_average', 'interests', 'description', 'profession']);
+    ctx.status = 200;
+    ctx.body = user;
 	} catch(e) { console.error('Get user error', e); }
-	ctx.status = 200;
-	ctx.body = user;
 };
 
 module.exports.me = async (ctx, next) => {

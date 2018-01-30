@@ -5,10 +5,54 @@ const monk = require('monk');
 const db = monk(process.env.MONGOLAB_URI);
 
 const Events = db.get('events');
-Events.createIndex( { location : "2dsphere" } );
 const Users = db.get('users');
 
-// This module expects an object with all the data for creating a new event
+Events.createIndex( { location : "2dsphere" } );
+// from test ////////////////////////////////////////////
+
+// const createdEvent = {}
+// const eventController = new EventsController({
+//   insert: jest.fn().returnValue(() => createdEvent)
+// })
+
+// ctx = {};
+// eventController.createEvent(ctx, next);
+// ctx.body.toEqual(JSON.stringify({
+//   'event': createdEvent
+// }))
+// ctx.status.toEqual(201);
+
+/////////////////////////////////////////////////////////
+
+
+class EventsController {
+  constrcutor(Events) {
+    this.Events = Events;
+  }
+
+  async createEvent(ctx, next) {
+    if ('POST' != ctx.method) return await next();
+    console.log(typeof ctx.user._id);
+    const newEvent = {
+      place_id: ctx.request.body.place_id,
+      place_name: ctx.request.body.place_name,
+      place_address: ctx.request.body.place_address,
+      location: ctx.request.body.location,
+      when: ctx.request.body.when,
+      creator: ctx.user._id,
+      attendees: [ctx.user._id],
+    };
+    try {
+      const event = await this.Events.insert(newEvent);
+      ctx.status = 200;
+      ctx.body = JSON.stringify({'event': event});
+    } catch (e) { console.log('Event create error: ', e);}
+      ctx.status = 400;
+    }
+}
+
+module.exports = EventsController;
+
 module.exports.createEvent = async (ctx, next) => {
   if ('POST' != ctx.method) return await next();
   console.log(typeof ctx.user._id);
@@ -29,8 +73,6 @@ module.exports.createEvent = async (ctx, next) => {
 	ctx.status = 400;
 };
 
-// Edit event module:
-// take the complete event params from request body
 module.exports.editEvent = async (ctx, next) => {
   if ('PUT' != ctx.method) return await next();
   console.log(ctx.request.body);
@@ -46,9 +88,6 @@ module.exports.editEvent = async (ctx, next) => {
   } catch (e) { console.log('Modify create error: ', e); }
 };
 
-// Delete event
-// uses the ID parsed from the uri
-// notify the others users of cancel
 module.exports.deleteEvent = async (ctx, next) => {
   if ('DELETE' != ctx.method) return await next();
   const event = await Events.findOne({ _id: ctx.params.id, creator: ctx.user._id });
@@ -60,24 +99,40 @@ module.exports.deleteEvent = async (ctx, next) => {
   }
 };
 
-// GET event informations
 module.exports.getEvent = async (ctx, next) => {
-	if ('GET' != ctx.method) return await next();
-  const event = await Events.findOne({ _id: ctx.params.id });
-  const attendees_ids = event.attendees;
-  console.log('attendees_ids', attendees_ids);
-  event.attendees = await Users.find({ _id: { $in: attendees_ids }}, { _id: 1, name: 1, profile_picture: 1 });
-	if (event) {
-		ctx.status = 200;
-		ctx.body = event;
-	} else {
-		ctx.status = 404;
-		ctx.body = 'The event does not exist';
-	}
+  if ('GET' != ctx.method) return await next();
+
+  const event = await Events.aggregate([
+    { $match: { _id: monk.id(ctx.params.id) } },
+    { $lookup:
+      {
+        from: "users",
+        localField: "attendees",
+        foreignField: "_id",
+        as: "attendees"
+      },
+    },
+    { $project: {
+        "attendees.email": 0,
+        "attendees.birthday": 0,
+        "attendees.gender": 0,
+        "attendees.events": 0,
+        "attendees.created_events": 0,
+        "attendees.accessToken": 0,
+        "attendees.ratings_average": 0,
+        "attendees.ratings_number": 0,
+        "attendees.profession": 0,
+        "attendees.description": 0,
+        "attendees.interests": 0
+      }
+    }
+  ]);
+  ctx.status = 200;
+  ctx.body = event;
 };
 
 module.exports.joinEvent = async (ctx, next) => {
-if ('PUT' != ctx.method) return await next();
+  if ('PUT' != ctx.method) return await next();
   try {
     await Events.update({ _id: ctx.params.id, 'attendees.3': { $exists: false } },
       { $addToSet: { attendees: ctx.user._id }}
@@ -125,43 +180,40 @@ module.exports.getEvents = async (ctx, next) => {
   let from = Number(ctx.request.query.from) ? Number(ctx.request.query.from) : Date.now();
   let to = Number(ctx.request.query.to) ? Number(ctx.request.query.to) : Date.now() + 3600*24*7;
   console.log(ctx.request.query);
-  const events = await Events.aggregate([{
-    $geoNear: {
-        near: { type: "Point", coordinates: [ lat, lng ] },
-        distanceField: "dist.calculated",
-        maxDistance: distance,
-        query: { when: { $gte: from , $lte: to } },
-        limit: limit,
-        spherical: true
+  const events = await Events.aggregate([
+    { $geoNear: {
+      near: { type: "Point", coordinates: [ lat, lng ] },
+      distanceField: "distance",
+      maxDistance: distance,
+      query: { when: { $gte: from , $lte: to } },
+      limit: limit,
+      spherical: true
     }
-  }]);
+  },
+  { $lookup:
+    {
+      from: "users",
+      localField: "attendees",
+      foreignField: "_id",
+      as: "attendees"
+    },
+  },
+  { $project: {
+      "attendees.email": 0,
+      "attendees.birthday": 0,
+      "attendees.gender": 0,
+      "attendees.events": 0,
+      "attendees.created_events": 0,
+      "attendees.accessToken": 0,
+      "attendees.ratings_average": 0,
+      "attendees.ratings_number": 0,
+      "attendees.profession": 0,
+      "attendees.description": 0,
+      "attendees.interests": 0
+    }
+  }
+]);
   console.log('events', events);
   ctx.status = 200;
   ctx.body = JSON.stringify(events);
-
-  // await Events.geoHaystackSearch(
-  //   Number(ctx.request.headers.latitude),
-  //   Number(ctx.request.headers.longitude),
-  //   { search : { when: { $gte: Number(ctx.request.headers.from) , $lte: Number(ctx.request.headers.to) } },
-  //   limit: 100,
-  //   maxDistance: maxDistance } //, $lte: ctx.request.headers.to
-  // ).then(result => console.log(result));
-
-  //   {
-  //   geoSearch: "events",
-  //   near: [Number(ctx.request.headers.latitude), Number(ctx.request.headers.longitude)],
-  //   maxDistance: Number(ctx.request.headers.maxDistance),
-  //   search : { when: { $gte: Number(ctx.request.headers.from) , $lte: Number(ctx.request.headers.to) }},
-  //   limit: 100
-  // });
-
-  // const events = await Events.find({
-  //   location: {
-  //     $near : {
-  //       $geometry: { type: "Point", coordinates: [ latitude, longitude ] },
-  //       $maxDistance: maxDistance,
-  //     }
-  //   },
-  //   when: { $gte: Number(ctx.request.headers.from) , $lte: Number(ctx.request.headers.to) },
-  // });
 };
