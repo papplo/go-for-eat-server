@@ -7,6 +7,9 @@ const db = monk(process.env.MONGOLAB_URI);
 const Events = db.get('events');
 const Users = db.get('users');
 
+Events.createIndex( { location : "2dsphere" } );
+
+
 
 // This module expects an object with all the data for creating a new event
 module.exports.createEvent = async (ctx, next) => {
@@ -118,10 +121,34 @@ module.exports.leaveEvent = async (ctx, next) => {
 
 module.exports.getEvents = async (ctx, next) => {
   if ('GET' != ctx.method) return await next();
+  let latitude = Number(ctx.request.headers.latitude);
+  let longitude = Number(ctx.request.headers.longitude);
+  let maxDistance = Number(ctx.request.headers.distance);
+  console.log(ctx.request.headers.distance);
+  // await Events.geoHaystackSearch(
+  //   Number(ctx.request.headers.latitude),
+  //   Number(ctx.request.headers.longitude),
+  //   { search : { when: { $gte: Number(ctx.request.headers.from) , $lte: Number(ctx.request.headers.to) } },
+  //   limit: 100,
+  //   maxDistance: maxDistance } //, $lte: ctx.request.headers.to
+  // ).then(result => console.log(result));
   const events = await Events.find(
-    { when: { $gte: Number(ctx.request.headers.from) , $lte: Number(ctx.request.headers.to)  } } //, $lte: ctx.request.headers.to
+    { location: { $near :
+        { $geometry: { type: "Point", coordinates: [ latitude, longitude ] },
+        $maxDistance: maxDistance
+        }
+      },
+      when: { $gte: Number(ctx.request.headers.from) , $lte: Number(ctx.request.headers.to) },
+    }
   );
+  //   {
+  //   geoSearch: "events",
+  //   near: [Number(ctx.request.headers.latitude), Number(ctx.request.headers.longitude)],
+  //   maxDistance: Number(ctx.request.headers.maxDistance),
+  //   search : { when: { $gte: Number(ctx.request.headers.from) , $lte: Number(ctx.request.headers.to) }},
+  //   limit: 100
+  // });
   console.log('events', events);
   ctx.status = 200;
-  ctx.body = JSON.stringify(events);
+  // ctx.body = JSON.stringify(events);
 };
