@@ -27,13 +27,6 @@ require('../db');
 class EventsController {
   constructor(Events) {
     this.Events = Events;
-    this.createEvent = this.createEvent.bind(this);
-    this.editEvent = this.editEvent.bind(this);
-    this.deleteEvent = this.deleteEvent.bind(this);
-    this.getEvent = this.getEvent.bind(this);
-    this.joinEvent = this.joinEvent.bind(this);
-    this.leaveEvent = this.leaveEvent.bind(this);
-    this.getEvents = this.getEvents.bind(this);
   }
 
   async createEvent (ctx, next) {

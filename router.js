@@ -4,7 +4,15 @@ const usersController = require('./controllers/usersController');
 const EventsController = require('./controllers/eventsController');
 const ratingsController = require('./controllers/ratingsController');
 
-require('./db');
+const monk = require('monk');
+const db = monk(process.env.MONGOLAB_URI);
+
+const Events = db.get('events');
+const Users = db.get('users');
+
+
+Events.createIndex( { location : "2dsphere" } );
+
 
 const eventsController = new EventsController(Events);
 
@@ -28,13 +36,13 @@ const routes = function (app) {
 		.put('/api/v1/me', authorize, usersController.edit)
 		.put('/api/v1/users/:id', authorize, ratingsController.rating)
 
-		.post('/api/v1/events', authorize, eventsController.createEvent)
-		.put('/api/v1/events/:id', authorize, eventsController.editEvent)
-		.delete('/api/v1/events/:id', authorize, eventsController.deleteEvent)
-		.get('/api/v1/events/:id', authorize, eventsController.getEvent)
-		.put('/api/v1/events/:id/users', authorize, eventsController.joinEvent)
-		.delete('/api/v1/events/:id/users', authorize, eventsController.leaveEvent)
-		.get('/api/v1/events', authorize, eventsController.getEvents)
+		.post('/api/v1/events', authorize, eventsController.createEvent.bind(eventsController))
+		.put('/api/v1/events/:id', authorize, eventsController.editEvent.bind(eventsController))
+		.delete('/api/v1/events/:id', authorize, eventsController.deleteEvent.bind(eventsController))
+		.get('/api/v1/events/:id', authorize, eventsController.getEvent.bind(eventsController))
+		.put('/api/v1/events/:id/users', authorize, eventsController.joinEvent.bind(eventsController))
+		.delete('/api/v1/events/:id/users', authorize, eventsController.leaveEvent.bind(eventsController))
+		.get('/api/v1/events', authorize, eventsController.getEvents.bind(eventsController))
 
 		.options('/', options)
 		.trace('/', trace)

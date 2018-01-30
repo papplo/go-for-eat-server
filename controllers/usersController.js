@@ -3,7 +3,11 @@ const axios = require('axios');
 const config = require('../config.js');
 const filterProps = require('../services/utils').filterProps;
 
-require('../db');
+const monk = require('monk');
+const db = monk(process.env.MONGOLAB_URI);
+
+const Events = db.get('events');
+const Users = db.get('users');
 
 
 const userDB = async (userData) => {
