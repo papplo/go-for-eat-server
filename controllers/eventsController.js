@@ -120,15 +120,16 @@ module.exports.leaveEvent = async (ctx, next) => {
 
 module.exports.getEvents = async (ctx, next) => {
   if ('GET' != ctx.method) return await next();
-  let latitude = Number(ctx.request.query.latitude);
-  let longitude = Number(ctx.request.query.longitude);
-  let distance = Number(ctx.request.query.distance) ? Number(ctx.request.query.distance) : 1000;
-  let limit = Number(ctx.request.query.distance) ? Number(ctx.request.query.distance) : 100;
+  let lat = Number(ctx.request.query.lat);
+  let lng = Number(ctx.request.query.lng);
+  let distance = Number(ctx.request.query.dist) ? Number(ctx.request.query.dist) : 1000;
+  let limit = Number(ctx.request.query.limit) ? Number(ctx.request.query.limit) : 100;
   let from = Number(ctx.request.query.from) ? Number(ctx.request.query.from) : Date.now();
   let to = Number(ctx.request.query.to) ? Number(ctx.request.query.to) : Date.now() + 3600*24*7;
+  console.log(ctx.request.query);
   const events = await Events.aggregate([{
     $geoNear: {
-        near: { type: "Point", coordinates: [ latitude, longitude ] },
+        near: { type: "Point", coordinates: [ lat, lng ] },
         distanceField: "dist.calculated",
         maxDistance: distance,
         query: { when: { $gte: from , $lte: to } },
