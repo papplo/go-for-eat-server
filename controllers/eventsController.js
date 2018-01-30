@@ -119,8 +119,9 @@ module.exports.leaveEvent = async (ctx, next) => {
 module.exports.getEvents = async (ctx, next) => {
   if ('GET' != ctx.method) return await next();
   const events = await Events.find(
-    {}
+    { when: { $gte: Number(ctx.request.headers.from) , $lte: Number(ctx.request.headers.to)  } } //, $lte: ctx.request.headers.to
   );
+  console.log('events', events);
   ctx.status = 200;
   ctx.body = JSON.stringify(events);
 };
