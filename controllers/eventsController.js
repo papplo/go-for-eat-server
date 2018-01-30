@@ -1,11 +1,7 @@
 'use strict';
 
 const config = require('../config.js');
-
-// Don't cancel  const monk, it's required by a function
 const monk = require('monk');
-
-require('../db');
 
 // from test ////////////////////////////////////////////
 
