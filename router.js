@@ -1,8 +1,21 @@
 'use strict';
 
 const usersController = require('./controllers/usersController');
-const eventsController = require('./controllers/eventsController');
+const EventsController = require('./controllers/eventsController');
 const ratingsController = require('./controllers/ratingsController');
+
+require('./db');
+const monk = require('monk');
+const db = monk(process.env.MONGOLAB_URI);
+
+const Events = db.get('events');
+
+Events.createIndex( { location : "2dsphere" } );
+
+
+
+const eventsController = new EventsController(Events);
+
 
 const router = require('koa-router')();
 

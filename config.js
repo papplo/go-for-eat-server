@@ -3,7 +3,7 @@ module.exports = {
 		clientId: process.env.FACEBOOK_CLIENTID,
 		clientSecret: process.env.FACEBOOK_CLIENTSECRET,
 		validateUrl: 'https://graph.facebook.com/me',
-		fields: '?fields=id,name,email,picture,birthday,gender'
+		fields: '?fields=id,name,first_name,picture,birthday,gender'
 	},
 	google: {
 		consumerKey: process.env.GOOGLE_CONSUMERKEY,

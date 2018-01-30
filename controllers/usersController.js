@@ -46,12 +46,12 @@ module.exports.auth = async (ctx, next) => {
 					'Authorization': 'Bearer ' + ctx.request.body.accessToken,
 				}
 			});
-			// console.log('authResult', authResult.status);
+			console.log('authResult', authResult);
 			if (authResult.data.id == ctx.request.body.id) {
 				const events = await Events.find({events: ctx.request.body.id});
 				const created_events = await Events.find({created_events: ctx.request.body.id});
 				let user = {
-					'name': authResult.data.name,
+					'name': authResult.data.first_name,
 					'email': authResult.data.email,
 					'profile_picture': authResult.data.picture.data.url,
 					'birthday': authResult.data.birthday,
@@ -77,10 +77,10 @@ module.exports.auth = async (ctx, next) => {
 					'Authorization': 'Bearer ' + ctx.request.body.accessToken,
 				}
 			});
-			// console.log('authResult', authResult.data);
+			console.log('authResult', authResult.data);
 			if (authResult.data.sub == ctx.request.body.id) {
 				let user = {
-					'name': authResult.data.name,
+					'name': authResult.data.given_name,
 					'email': authResult.data.email,
 					'profile_picture': authResult.data.picture,
 					'birthday': 'authResult.data.birthday',
