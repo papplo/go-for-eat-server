@@ -5,6 +5,7 @@ const monk = require('monk');
 const db = monk(process.env.MONGOLAB_URI);
 
 const Events = db.get('events');
+Events.createIndex( { location : "2dsphere" } );
 const Users = db.get('users');
 
 // This module expects an object with all the data for creating a new event
@@ -24,7 +25,6 @@ module.exports.createEvent = async (ctx, next) => {
     const event = await Events.insert(newEvent);
 		ctx.status = 200;
     ctx.body = JSON.stringify({'event': event});
-    Events.createIndex( { location : "2dsphere" } );
 	} catch (e) { console.log('Event create error: ', e);}
 	ctx.status = 400;
 };
@@ -43,7 +43,6 @@ module.exports.editEvent = async (ctx, next) => {
       when: ctx.request.body.when,
     }});
     ctx.status = 204;
-    Events.createIndex( { location : "2dsphere" } );
   } catch (e) { console.log('Modify create error: ', e); }
 };
 
@@ -57,7 +56,6 @@ module.exports.deleteEvent = async (ctx, next) => {
     try {
       await Events.remove({ _id: ctx.params.id});
       ctx.status = 204;
-      Events.createIndex( { location : "2dsphere" } );
     } catch(e) { console.log('Deleting event error: ', e);}
   }
 };
