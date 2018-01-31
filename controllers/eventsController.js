@@ -1,12 +1,12 @@
 'use strict';
 
 const config = require('../config.js');
-const monk = require('monk');
 
 
 class EventsController {
-  constructor(Events) {
+  constructor(Events, monk) {
     this.Events = Events;
+    this.monk = monk;
   }
 
   async createEvent (ctx, next) {
@@ -60,7 +60,7 @@ class EventsController {
     if ('GET' != ctx.method) return await next();
 
     const event = await this.Events.aggregate([
-      { $match: { _id: monk.id(ctx.params.id) } },
+      { $match: { _id: this.monk.id(ctx.params.id) } },
       { $lookup:
         {
           from: "users",

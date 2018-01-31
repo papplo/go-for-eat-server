@@ -49,13 +49,19 @@ const next = () => {};
 const createdEvent = {
   attendees: ['42']
 };
-const eventController = new EventsController({
+
+const mockEventsMongoInstance = {
   insert: mockMongoDb(() => createdEvent),
   update: mockMongoDb(() => createdEvent),
   remove: mockMongoDb(() => createdEvent),
   findOne: mockMongoDb(() => createdEvent),
   aggregate: mockMongoDb(() => createdEvent)
-})
+}
+
+const mockMonkInstance = {
+  id: mockMongoDb(() => createdEvent)
+}
+const eventController = new EventsController(mockEventsMongoInstance, mockMonkInstance);
 
 describe('Test response on events functions', () => {
   
@@ -87,7 +93,7 @@ describe('Test response on events functions', () => {
   });
 
   test('Return 204 on joining an event', async () => {
-    ctx.method = 'GET';
+    ctx.method = 'PUT';
     await eventController.joinEvent(ctx, next);
     expect(ctx.status).toEqual(204);
   });
