@@ -29,6 +29,10 @@ let ctx = {
   status: 0,
   user: '',
   request: {
+    query: {
+      lat: '42',
+      lng: '42'
+    },
     body: {
       place_id: '',
       place_name: '',
@@ -42,7 +46,9 @@ let ctx = {
 };
 
 const next = () => {};
-const createdEvent = {};
+const createdEvent = {
+  attendees: ['42']
+};
 const eventController = new EventsController({
   insert: mockMongoDb(() => createdEvent),
   update: mockMongoDb(() => createdEvent),
@@ -84,6 +90,22 @@ describe('Test response on events functions', () => {
     ctx.method = 'GET';
     await eventController.joinEvent(ctx, next);
     expect(ctx.status).toEqual(204);
+  });
+
+  test('Return 200 on leaving an event', async () => {
+    ctx.method = 'DELETE';
+    await eventController.leaveEvent(ctx, next);
+    expect(ctx.body).toEqual(JSON.stringify({
+      'event': createdEvent
+    }))
+    expect(ctx.status).toEqual(200);
+  });
+
+  test('Return 200 on getting all events nearby list', async () => {
+    ctx.method = 'GET';
+    await eventController.getEvents(ctx, next);
+    expect(ctx.body).toEqual(JSON.stringify(createdEvent))
+    expect(ctx.status).toEqual(200);
   });
 
 })
