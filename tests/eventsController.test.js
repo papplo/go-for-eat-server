@@ -47,7 +47,8 @@ const eventController = new EventsController({
   insert: mockMongoDb(() => createdEvent),
   update: mockMongoDb(() => createdEvent),
   remove: mockMongoDb(() => createdEvent),
-  findOne: mockMongoDb(() => createdEvent)
+  findOne: mockMongoDb(() => createdEvent),
+  aggregate: mockMongoDb(() => createdEvent)
 })
 
 describe('Test response on events functions', () => {
@@ -72,5 +73,17 @@ describe('Test response on events functions', () => {
     await eventController.deleteEvent(ctx, next);
     expect(ctx.status).toEqual(204);
   });  
+
+  test('Return 200 on getting infos of an event', async () => {
+    ctx.method = 'GET';
+    await eventController.getEvent(ctx, next);
+    expect(ctx.status).toEqual(200);
+  });
+
+  test('Return 204 on joining an event', async () => {
+    ctx.method = 'GET';
+    await eventController.joinEvent(ctx, next);
+    expect(ctx.status).toEqual(204);
+  });
 
 })
