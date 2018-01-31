@@ -234,5 +234,11 @@ describe('Test on event not found or wrong ID', () => {
     expect(ctx.status).toEqual(400);
   });
 
+  test('joinEvent returns error 400 if query has no matches', async () => {
+    ctx.method = 'DELETE';
+    await eventControllerNoMatches.joinEvent(ctx, next);
+    expect(ctx.status).toEqual(400);
+  });
+
 });
  

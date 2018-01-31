@@ -109,6 +109,7 @@ class EventsController {
           }
         }
       ]);
+
       ctx.status = 200;
       ctx.body = event;
     } catch(e) { console.log('Get Single Event error', e) }
@@ -117,9 +118,10 @@ class EventsController {
   async joinEvent (ctx, next) {
     if ('PUT' != ctx.method) return await next();
     try {
-      await this.Events.update({ _id: ctx.params.id, 'attendees.3': { $exists: false } },
+      const updateResult = await this.Events.update({ _id: ctx.params.id, 'attendees.3': { $exists: false } },
         { $addToSet: { attendees: ctx.user._id }}
       );
+      if (updateResult.nMatched === 0) throw `Event ${ctx.params.id} not found`
       ctx.status = 204;
       // console.log( await this.Events.findOne({_id: ctx.params.id}));
     } catch (e) { console.error('Update user error', e); }
