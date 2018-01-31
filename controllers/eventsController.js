@@ -3,22 +3,6 @@
 const config = require('../config.js');
 const monk = require('monk');
 
-// from test ////////////////////////////////////////////
-
-// const createdEvent = {}
-// const eventController = new EventsController({
-//   insert: jest.fn().returnValue(() => createdEvent)
-// })
-
-// ctx = {};
-// eventController.createEvent(ctx, next);
-// ctx.body.toEqual(JSON.stringify({
-//   'event': createdEvent
-// }))
-// ctx.status.toEqual(201);
-
-/////////////////////////////////////////////////////////
-
 
 class EventsController {
   constructor(Events) {
@@ -39,10 +23,11 @@ class EventsController {
     };
     try {
       const event = await this.Events.insert(newEvent);
-      ctx.status = 200;
+      ctx.status = 201;
       ctx.body = JSON.stringify({'event': event});
-    } catch (e) { console.log('Event create error: ', e);}
+    } catch (e) { console.log('Event create error: ', e);
       ctx.status = 400;
+    }
   }
 
  async editEvent (ctx, next) {
