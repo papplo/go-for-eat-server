@@ -29,7 +29,7 @@ class EventsController {
           throw `Latitude field not present or not a number`;
         }
         if (!ctx.request.body.location.lng || typeof ctx.request.body.location.lng !== 'number' ) {
-          throw `Latitude field not present or not a number`;
+          throw `Longitude field not present or not a number`;
         }
       }
       const event = await this.Events.insert(newEvent);
@@ -51,16 +51,17 @@ class EventsController {
           throw `Latitude field not present or not a number`;
         }
         if (!ctx.request.body.location.lng || typeof ctx.request.body.location.lng !== 'number' ) {
-          throw `Latitude field not present or not a number`;
+          throw `Longitude field not present or not a number`;
         }
       }
-      await this.Events.update({ _id: ctx.params.id }, { $set: {
+      const updateResult = await this.Events.update({ _id: ctx.params.id }, { $set: {
         place_id: ctx.request.body.place_id,
         place_name: ctx.request.body.place_name,
         place_address: ctx.request.body.place_address,
         location: ctx.request.body.location,
         when: ctx.request.body.when,
       }});
+      if (updateResult.nMatched === 0) throw `Event ${ctx.params.id} not found`
       ctx.status = 204;
     } catch (e) { console.log('Modify create error: ', e); 
       ctx.status = 400;

@@ -121,7 +121,7 @@ const mockMonkInstance = {
 }
 const eventController = new EventsController(mockEventsMongoInstance, mockMonkInstance);
 
-describe('Test correct response on events functions', () => {
+describe('Test correct response on events functions calls', () => {
   
   test('Return 201 on create event', async () => {
     ctx.method = 'POST';
@@ -199,17 +199,33 @@ describe('Test correct response on events functions', () => {
 
 })
 
-/* const eventControllerWrongMethod = new EventsController(mockEventsMongoInstance, mockMongoDb);
+
+const WriteResult = {
+  nMatched: 0
+}
+
+const mockEmptyMongoInstance = {
+  insert: mockMongoDb(() => createdEvent),
+  update: mockMongoDb(() => WriteResult),
+  remove: mockMongoDb(() => createdEvent),
+  findOne: mockMongoDb(() => createdEvent),
+  aggregate: mockMongoDb(() => createdEvent)
+}
 
 
-describe('Test correct error response on events functions called on with wrong method', () => {
+const eventControllerNoMatches = new EventsController(mockEmptyMongoInstance, mockMonkInstance);
 
-  test('Call next on wrong ctx.method on createEvent', async () => {
-    ctx.method = 'DELETE';
-    await eventControllerWrongMethod.createEvent(ctx, next);
-    expect(mockMongoDb).toHaveBeenCalled();
+
+describe('Test on event not found or wrong ID', () => {
+
+  test('editEvent returns error 400 if query has no matches', async () => {
+    ctx.method = 'PUT';
+    await eventControllerNoMatches.editEvent(ctx, next);
+    expect(ctx.status).toEqual(400);
   });
- */
+
+});
+ 
  /*  test('Return 400 on editEvent not PUT method', async () => {
     ctx.method = 'GET';
     await eventController.editEvent(ctx, next);
