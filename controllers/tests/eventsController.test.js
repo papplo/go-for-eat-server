@@ -114,11 +114,11 @@ const mockEventsMongoInstance = {
   remove: mockMongoDb(() => createdEvent),
   findOne: mockMongoDb(() => createdEvent),
   aggregate: mockMongoDb(() => createdEvent)
-}
+};
 
 const mockMonkInstance = {
   id: mockMongoDb(() => createdEvent)
-}
+};
 const eventController = new EventsController(mockEventsMongoInstance, mockMonkInstance);
 
 describe('Test correct response on events functions calls', () => {
@@ -128,7 +128,7 @@ describe('Test correct response on events functions calls', () => {
     await eventController.createEvent(ctx, next);
     expect(ctx.body).toEqual(JSON.stringify({
       'event': createdEvent
-    }))
+    }));
     expect(ctx.status).toEqual(201);
   });
   
@@ -186,25 +186,25 @@ describe('Test correct response on events functions calls', () => {
     await eventController.leaveEvent(ctx, next);
     expect(ctx.body).toEqual(JSON.stringify({
       'event': createdEvent
-    }))
+    }));
     expect(ctx.status).toEqual(200);
   });
 
   test('Return 200 on getting all events nearby list', async () => {
     ctx.method = 'GET';
     await eventController.getEvents(ctx, next);
-    expect(ctx.body).toEqual(JSON.stringify(createdEvent))
+    expect(ctx.body).toEqual(JSON.stringify(createdEvent));
     expect(ctx.status).toEqual(200);
   });
 
-})
+});
 
 
-// Testing stuf f - when Id has no matches on the database
+// Testing stuff - when Id has no matches on the database
 
 const WriteResult = {
   nMatched: 0
-}
+};
 
 const nullResult = null;
 
@@ -214,7 +214,7 @@ const mockEmptyMongoInstance = {
   remove: mockMongoDb(() => createdEvent),
   findOne: mockMongoDb(() => nullResult),
   aggregate: mockMongoDb(() => createdEvent)
-}
+};
 
 
 const eventControllerNoMatches = new EventsController(mockEmptyMongoInstance, mockMonkInstance);

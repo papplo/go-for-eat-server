@@ -4,7 +4,7 @@ const config = require('../config.js');
 
 
 class EventsController {
-  constructor(Events, monk) {
+  constructor (Events, monk) {
     this.Events = Events;
     this.monk = monk;
   }
@@ -26,21 +26,23 @@ class EventsController {
         // console.log('here', [key])
         if (!newEvent[key]) throw `Empty parameter ${[key]}`;
         if (!ctx.request.body.location.lat || typeof ctx.request.body.location.lat !== 'number' ) {
-          throw `Latitude field not present or not a number`;
+          throw 'Latitude field not present or not a number';
         }
         if (!ctx.request.body.location.lng || typeof ctx.request.body.location.lng !== 'number' ) {
-          throw `Longitude field not present or not a number`;
+          throw 'Longitude field not present or not a number';
         }
       }
       const event = await this.Events.insert(newEvent);
       ctx.status = 201;
       ctx.body = JSON.stringify({'event': event});
-    } catch (e) { console.log('Event create error: ', e);
+    } catch (e) { 
+      // eslint-disable-next-line no-console
+      console.error('Event create error: ', e);
       ctx.status = 400;
     }
   }
 
- async editEvent (ctx, next) {
+  async editEvent (ctx, next) {
     if ('PUT' != ctx.method) return await next();
     // console.log(ctx.request.body);
     try {
@@ -48,10 +50,10 @@ class EventsController {
         // console.log('here', [key])
         if (!ctx.request.body[key]) throw `Empty parameter ${[key]}`;
         if (!ctx.request.body.location.lat || typeof ctx.request.body.location.lat !== 'number' ) {
-          throw `Latitude field not present or not a number`;
+          throw 'Latitude field not present or not a number';
         }
         if (!ctx.request.body.location.lng || typeof ctx.request.body.location.lng !== 'number' ) {
-          throw `Longitude field not present or not a number`;
+          throw 'Longitude field not present or not a number';
         }
       }
       const updateResult = await this.Events.update({ _id: ctx.params.id }, { $set: {
@@ -61,12 +63,14 @@ class EventsController {
         location: ctx.request.body.location,
         when: ctx.request.body.when,
       }});
-      if (updateResult.nMatched === 0) throw `Event ${ctx.params.id} not found`
+      if (updateResult.nMatched === 0) throw `Event ${ctx.params.id} not found`;
       ctx.status = 204;
-    } catch (e) { console.log('Modify create error: ', e); 
+    } catch (e) { 
+      // eslint-disable-next-line no-console
+      console.error('Modify create error: ', e); 
       ctx.status = 400;
     }
-  };
+  }
 
   async deleteEvent (ctx, next)  {
     if ('DELETE' != ctx.method) return await next();
@@ -75,11 +79,12 @@ class EventsController {
       if (event && event.attendees.length === 1) await this.Events.remove({ _id: ctx.params.id});
       else throw `Event not present or only one attendee -> ${Array.isArray(event.attendees)}, ${event.attendees.length}`;   
       ctx.status = 204;
-    } catch(e) { 
-      console.log('Deleting event error: ', e);
+    } catch (e) { 
+      // eslint-disable-next-line no-console
+      console.error('Deleting event error: ', e);
       ctx.status = 400;
     }
-  };
+  }
 
   async getEvent (ctx, next) {
     if ('GET' != ctx.method) return await next();
@@ -88,32 +93,35 @@ class EventsController {
         { $match: { _id: this.monk.id(ctx.params.id) } },
         { $lookup:
           {
-            from: "users",
-            localField: "attendees",
-            foreignField: "_id",
-            as: "attendees"
+            from: 'users',
+            localField: 'attendees',
+            foreignField: '_id',
+            as: 'attendees'
           },
         },
         { $project: {
-            "attendees.email": 0,
-            "attendees.birthday": 0,
-            "attendees.gender": 0,
-            "attendees.events": 0,
-            "attendees.created_events": 0,
-            "attendees.accessToken": 0,
-            "attendees.ratings_average": 0,
-            "attendees.ratings_number": 0,
-            "attendees.profession": 0,
-            "attendees.description": 0,
-            "attendees.interests": 0
-          }
+          'attendees.email': 0,
+          'attendees.birthday': 0,
+          'attendees.gender': 0,
+          'attendees.events': 0,
+          'attendees.created_events': 0,
+          'attendees.accessToken': 0,
+          'attendees.ratings_average': 0,
+          'attendees.ratings_number': 0,
+          'attendees.profession': 0,
+          'attendees.description': 0,
+          'attendees.interests': 0
+        }
         }
       ]);
 
       ctx.status = 200;
       ctx.body = event;
-    } catch(e) { console.log('Get Single Event error', e) }
-  };
+    } catch (e) { 
+      // eslint-disable-next-line no-console
+      console.error('Get Single Event error', e); 
+    }
+  }
 
   async joinEvent (ctx, next) {
     if ('PUT' != ctx.method) return await next();
@@ -121,11 +129,14 @@ class EventsController {
       const updateResult = await this.Events.update({ _id: ctx.params.id, 'attendees.3': { $exists: false } },
         { $addToSet: { attendees: ctx.user._id }}
       );
-      if (updateResult.nMatched === 0) throw `Event ${ctx.params.id} not found`
+      if (updateResult.nMatched === 0) throw `Event ${ctx.params.id} not found`;
       ctx.status = 204;
       // console.log( await this.Events.findOne({_id: ctx.params.id}));
-    } catch (e) { console.error('Update user error', e); }
-  };
+    } catch (e) { 
+      // eslint-disable-next-line no-console
+      console.error('Update user error', e); 
+    }
+  }
 
   async leaveEvent (ctx, next) {
     if ('DELETE' != ctx.method) return await next();
@@ -134,10 +145,12 @@ class EventsController {
       attendees: ctx.user._id,
       'attendees.1': { $exists: true }
     });
+    // if (!event) throw `Error, event ${ctx.params.id} not found`;
     // console.log('event', event);
     if ( JSON.stringify(event.creator) === JSON.stringify(ctx.user._id) ) {
       event.creator = event.attendees[1];
-      console.log('event.attendees[1]', event.attendees[1]);
+      // eslint-disable-next-line no-console
+      // console.log('event.attendees[1]', event.attendees[1]);
     }
     try {
       let update = await this.Events.update(
