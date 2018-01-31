@@ -38,6 +38,10 @@ class EventsController {
     if ('PUT' != ctx.method) return await next();
     // console.log(ctx.request.body);
     try {
+      for (const key in ctx.request.body) {
+        // console.log('here', [key])
+        if (!ctx.request.body[key]) throw `Empty parameter ${[key]}`;
+      }
       await this.Events.update({ _id: ctx.params.id }, { $set: {
         place_id: ctx.request.body.place_id,
         place_name: ctx.request.body.place_name,
@@ -46,7 +50,9 @@ class EventsController {
         when: ctx.request.body.when,
       }});
       ctx.status = 204;
-    } catch (e) { console.log('Modify create error: ', e); }
+    } catch (e) { console.log('Modify create error: ', e); 
+      ctx.status = 400;
+    }
   };
 
   async deleteEvent (ctx, next)  {

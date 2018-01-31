@@ -113,6 +113,12 @@ describe('Test correct response on events functions', () => {
     expect(ctx.status).toEqual(204);
   });
 
+  test('Return 400 on editEvent with empty fields', async () => {
+    emptyDataCtx.method = 'PUT';
+    await eventController.editEvent(emptyDataCtx, next);
+    expect(emptyDataCtx.status).toEqual(400);
+  });
+
   test('Return 204 on deleting an event', async () => {
     ctx.method = 'DELETE';
     await eventController.deleteEvent(ctx, next);
