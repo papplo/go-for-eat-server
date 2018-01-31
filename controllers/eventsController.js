@@ -153,55 +153,66 @@ class EventsController {
       // console.log('updated event', event);
       ctx.body = JSON.stringify({'event': event});
       ctx.status = 200;
-    } catch (e) { console.log('Leave event error: ', e); }
-  };
+    } catch (e) { 
+      // eslint-disable-next-line no-console
+      console.error('Leave event error: ', e); 
+    }
+  }
 
   async getEvents (ctx, next) {
     if ('GET' != ctx.method) return await next();
-    let lat = Number(ctx.request.query.lat);
-    let lng = Number(ctx.request.query.lng);
-    let distance = Number(ctx.request.query.dist) ? Number(ctx.request.query.dist) : 1000;
-    let limit = Number(ctx.request.query.limit) ? Number(ctx.request.query.limit) : 100;
-    let from = Number(ctx.request.query.from) ? Number(ctx.request.query.from) : Date.now();
-    let to = Number(ctx.request.query.to) ? Number(ctx.request.query.to) : Date.now() + 3600*24*7;
-    // console.log(ctx.request.query);
-    const events = await this.Events.aggregate([
-      { $geoNear: {
-        near: { type: "Point", coordinates: [ lat, lng ] },
-        distanceField: "distance",
-        maxDistance: distance,
-        query: { when: { $gte: from , $lte: to } },
-        limit: limit,
-        spherical: true
-      }
-    },
-    { $lookup:
-      {
-        from: "users",
-        localField: "attendees",
-        foreignField: "_id",
-        as: "attendees"
-      },
-    },
-    { $project: {
-        "attendees.email": 0,
-        "attendees.birthday": 0,
-        "attendees.gender": 0,
-        "attendees.events": 0,
-        "attendees.created_events": 0,
-        "attendees.accessToken": 0,
-        "attendees.ratings_average": 0,
-        "attendees.ratings_number": 0,
-        "attendees.profession": 0,
-        "attendees.description": 0,
-        "attendees.interests": 0
-      }
+    try {
+      if (ctx.request.query.lat === '' || ctx.request.query.lng === '' ) throw 'Latitude and or Longitude not present';
+      let lat = Number(ctx.request.query.lat);
+      let lng = Number(ctx.request.query.lng);
+      // console.log(lat);
+      let distance = Number(ctx.request.query.dist) ? Number(ctx.request.query.dist) : 1000;
+      let limit = Number(ctx.request.query.limit) ? Number(ctx.request.query.limit) : 100;
+      let from = Number(ctx.request.query.from) ? Number(ctx.request.query.from) : Date.now();
+      let to = Number(ctx.request.query.to) ? Number(ctx.request.query.to) : Date.now() + 3600*24*7;
+      // console.log(ctx.request.query);
+      const events = await this.Events.aggregate([
+        { $geoNear: {
+          near: { type: 'Point', coordinates: [ lat, lng ] },
+          distanceField: 'distance',
+          maxDistance: distance,
+          query: { when: { $gte: from , $lte: to } },
+          limit: limit,
+          spherical: true
+        }
+        },
+        { $lookup:
+        {
+          from: 'users',
+          localField: 'attendees',
+          foreignField: '_id',
+          as: 'attendees'
+        },
+        },
+        { $project: {
+          'attendees.email': 0,
+          'attendees.birthday': 0,
+          'attendees.gender': 0,
+          'attendees.events': 0,
+          'attendees.created_events': 0,
+          'attendees.accessToken': 0,
+          'attendees.ratings_average': 0,
+          'attendees.ratings_number': 0,
+          'attendees.profession': 0,
+          'attendees.description': 0,
+          'attendees.interests': 0
+        }
+        }
+      ]);
+      // console.log('events', events);
+      ctx.status = 200;
+      ctx.body = JSON.stringify(events);
+    } catch (e) { 
+      // eslint-disable-next-line no-console
+      console.error( `getEvents error ${e}`);
+      ctx.status = 400; 
     }
-  ]);
-    // console.log('events', events);
-    ctx.status = 200;
-    ctx.body = JSON.stringify(events);
-  };
+  } 
 }
 
 module.exports = EventsController;

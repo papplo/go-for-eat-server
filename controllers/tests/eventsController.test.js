@@ -87,8 +87,8 @@ let wrongLocationCtx = {
   },
   request: {
     query: {
-      lat: '42',
-      lng: '42'
+      lat: '',
+      lng: ''
     },
     body: {
       place_id: 'aasdf',
@@ -240,5 +240,22 @@ describe('Test on event not found or wrong ID', () => {
     expect(ctx.status).toEqual(400);
   });
 
+  test('leaveEvent returns error 400 if query has no matches', async () => {
+    ctx.method = 'DELETE';
+    await eventControllerNoMatches.joinEvent(ctx, next);
+    expect(ctx.status).toEqual(400);
+  });
+
 });
- 
+
+
+// TODO: verify query params if they from and to are empty, what params do i get?
+describe('Test getEvents on wrong url params', () => {
+  test('leaveEvent returns error 400 if url has no position params', async () => {
+
+    wrongLocationCtx.method = 'GET';
+    wrongLocationCtx.status = 0;
+    await eventControllerNoMatches.getEvents(wrongLocationCtx, next);
+    expect(wrongLocationCtx.status).toEqual(400);
+  });
+});
