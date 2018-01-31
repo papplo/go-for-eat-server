@@ -25,6 +25,12 @@ class EventsController {
       for (const key in newEvent) {
         // console.log('here', [key])
         if (!newEvent[key]) throw `Empty parameter ${[key]}`;
+        if (!ctx.request.body.location.lat || typeof ctx.request.body.location.lat !== 'number' ) {
+          throw `Latitude field not present or not a number`;
+        }
+        if (!ctx.request.body.location.lng || typeof ctx.request.body.location.lng !== 'number' ) {
+          throw `Latitude field not present or not a number`;
+        }
       }
       const event = await this.Events.insert(newEvent);
       ctx.status = 201;
@@ -41,6 +47,12 @@ class EventsController {
       for (const key in ctx.request.body) {
         // console.log('here', [key])
         if (!ctx.request.body[key]) throw `Empty parameter ${[key]}`;
+        if (!ctx.request.body.location.lat || typeof ctx.request.body.location.lat !== 'number' ) {
+          throw `Latitude field not present or not a number`;
+        }
+        if (!ctx.request.body.location.lng || typeof ctx.request.body.location.lng !== 'number' ) {
+          throw `Latitude field not present or not a number`;
+        }
       }
       await this.Events.update({ _id: ctx.params.id }, { $set: {
         place_id: ctx.request.body.place_id,

@@ -39,7 +39,10 @@ let ctx = {
       place_id: 'aasdf',
       place_name: 'asdf',
       place_address: 'asdf',
-      location: '6565',
+      location: {
+        lat: 54324,
+        lng: 5523
+      },
       when: '3232',
       _id: '6464',
       attendees: []
@@ -71,6 +74,34 @@ let emptyDataCtx = {
     }
   }
 };
+
+// Mock context wrong location fields
+let wrongLocationCtx = {
+  params: {
+    id: ''
+  },
+  method: '',
+  status: 0,
+  user: {
+    _id: 'blabla'
+  },
+  request: {
+    query: {
+      lat: '42',
+      lng: '42'
+    },
+    body: {
+      place_id: 'aasdf',
+      place_name: 'asdf',
+      place_address: 'asdf',
+      location: '6565',
+      when: '3232',
+      _id: '6464',
+      attendees: []
+    }
+  }
+};
+
 
 const next = () => {};
 const createdEvent = {
@@ -107,6 +138,12 @@ describe('Test correct response on events functions', () => {
     expect(emptyDataCtx.status).toEqual(400);
   });
 
+  test('Return 400 on createEvent with wrong location entry fields', async () => {
+    wrongLocationCtx.method = 'POST';
+    await eventController.createEvent(wrongLocationCtx, next);
+    expect(wrongLocationCtx.status).toEqual(400);
+  });
+
   test('Return 204 on edit an event', async () => {
     ctx.method = 'PUT';
     await eventController.editEvent(ctx, next);
@@ -118,6 +155,13 @@ describe('Test correct response on events functions', () => {
     await eventController.editEvent(emptyDataCtx, next);
     expect(emptyDataCtx.status).toEqual(400);
   });
+
+  test('Return 400 on editEvent with wrong location entry fields', async () => {
+    wrongLocationCtx.method = 'POST';
+    await eventController.editEvent(wrongLocationCtx, next);
+    expect(wrongLocationCtx.status).toEqual(400);
+  });
+
 
   test('Return 204 on deleting an event', async () => {
     ctx.method = 'DELETE';
