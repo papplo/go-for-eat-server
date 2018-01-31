@@ -27,6 +27,33 @@ let ctx = {
   },
   method: '',
   status: 0,
+  user: {
+    _id: 'blabla'
+  },
+  request: {
+    query: {
+      lat: '42',
+      lng: '42'
+    },
+    body: {
+      place_id: 'aasdf',
+      place_name: 'asdf',
+      place_address: 'asdf',
+      location: '6565',
+      when: '3232',
+      _id: '6464',
+      attendees: []
+    }
+  }
+};
+
+// Mock context
+let emptyDataCtx = {
+  params: {
+    id: ''
+  },
+  method: '',
+  status: 0,
   user: '',
   request: {
     query: {
@@ -73,6 +100,12 @@ describe('Test correct response on events functions', () => {
     }))
     expect(ctx.status).toEqual(201);
   });
+  
+  test('Return 400 on createEvent with empty fields', async () => {
+    emptyDataCtx.method = 'POST';
+    await eventController.createEvent(emptyDataCtx, next);
+    expect(emptyDataCtx.status).toEqual(400);
+  });
 
   test('Return 204 on edit an event', async () => {
     ctx.method = 'PUT';
@@ -116,7 +149,7 @@ describe('Test correct response on events functions', () => {
 
 })
 
-const eventControllerWrongMethod = new EventsController(mockEventsMongoInstance, mockMongoDb);
+/* const eventControllerWrongMethod = new EventsController(mockEventsMongoInstance, mockMongoDb);
 
 
 describe('Test correct error response on events functions called on with wrong method', () => {
@@ -126,7 +159,7 @@ describe('Test correct error response on events functions called on with wrong m
     await eventControllerWrongMethod.createEvent(ctx, next);
     expect(mockMongoDb).toHaveBeenCalled();
   });
-
+ */
  /*  test('Return 400 on editEvent not PUT method', async () => {
     ctx.method = 'GET';
     await eventController.editEvent(ctx, next);
@@ -165,6 +198,7 @@ describe('Test correct error response on events functions called on with wrong m
     await eventController.getEvents(ctx, next);
     expect(ctx.body).toEqual(JSON.stringify(createdEvent))
     expect(ctx.status).toEqual(200);
-  }); */
+  }); 
 
 })
+*/

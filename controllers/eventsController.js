@@ -22,6 +22,10 @@ class EventsController {
       attendees: [ctx.user._id],
     };
     try {
+      for (const key in newEvent) {
+        // console.log('here', [key])
+        if (!newEvent[key]) throw `Empty parameter ${[key]}`;
+      }
       const event = await this.Events.insert(newEvent);
       ctx.status = 201;
       ctx.body = JSON.stringify({'event': event});
@@ -95,7 +99,7 @@ class EventsController {
         { $addToSet: { attendees: ctx.user._id }}
       );
       ctx.status = 204;
-      console.log( await this.Events.findOne({_id: ctx.params.id}));
+      // console.log( await this.Events.findOne({_id: ctx.params.id}));
     } catch (e) { console.error('Update user error', e); }
   };
 
@@ -136,7 +140,7 @@ class EventsController {
     let limit = Number(ctx.request.query.limit) ? Number(ctx.request.query.limit) : 100;
     let from = Number(ctx.request.query.from) ? Number(ctx.request.query.from) : Date.now();
     let to = Number(ctx.request.query.to) ? Number(ctx.request.query.to) : Date.now() + 3600*24*7;
-    console.log(ctx.request.query);
+    // console.log(ctx.request.query);
     const events = await this.Events.aggregate([
       { $geoNear: {
         near: { type: "Point", coordinates: [ lat, lng ] },
@@ -170,7 +174,7 @@ class EventsController {
       }
     }
   ]);
-    console.log('events', events);
+    // console.log('events', events);
     ctx.status = 200;
     ctx.body = JSON.stringify(events);
   };
