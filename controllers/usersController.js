@@ -85,8 +85,8 @@ module.exports.auth = async (ctx, next) => {
 					'name': authResult.data.given_name,
 					'email': authResult.data.email,
 					'profile_picture': authResult.data.picture,
-					'birthday': 'authResult.data.birthday',
-					'gender': 'authResult.data.gender',
+					'birthday': authResult.data.birthday,
+					'gender': authResult.data.gender,
 					'accessToken': 'GO' + ctx.request.body.accessToken,
 				};
 				console.log('user', user);

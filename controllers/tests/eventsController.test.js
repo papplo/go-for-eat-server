@@ -200,15 +200,19 @@ describe('Test correct response on events functions calls', () => {
 })
 
 
+// Testing stuf f - when Id has no matches on the database
+
 const WriteResult = {
   nMatched: 0
 }
+
+const nullResult = null;
 
 const mockEmptyMongoInstance = {
   insert: mockMongoDb(() => createdEvent),
   update: mockMongoDb(() => WriteResult),
   remove: mockMongoDb(() => createdEvent),
-  findOne: mockMongoDb(() => createdEvent),
+  findOne: mockMongoDb(() => nullResult),
   aggregate: mockMongoDb(() => createdEvent)
 }
 
@@ -224,47 +228,11 @@ describe('Test on event not found or wrong ID', () => {
     expect(ctx.status).toEqual(400);
   });
 
+  test('deleteEvent returns error 400 if query has no matches', async () => {
+    ctx.method = 'DELETE';
+    await eventControllerNoMatches.editEvent(ctx, next);
+    expect(ctx.status).toEqual(400);
+  });
+
 });
  
- /*  test('Return 400 on editEvent not PUT method', async () => {
-    ctx.method = 'GET';
-    await eventController.editEvent(ctx, next);
-    expect(ctx.status).toEqual(404);
-  });
-
-  test('Return 400 on deleteEvent not DELETE method', async () => {
-    ctx.method = 'DELETE';
-    await eventController.deleteEvent(ctx, next);
-    expect(ctx.status).toEqual(204);
-  });
-
-  test('Return 200 on getting infos of an event', async () => {
-    ctx.method = 'GET';
-    await eventController.getEvent(ctx, next);
-    expect(ctx.status).toEqual(200);
-  });
-
-  test('Return 204 on joining an event', async () => {
-    ctx.method = 'PUT';
-    await eventController.joinEvent(ctx, next);
-    expect(ctx.status).toEqual(204);
-  });
-
-  test('Return 200 on leaving an event', async () => {
-    ctx.method = 'DELETE';
-    await eventController.leaveEvent(ctx, next);
-    expect(ctx.body).toEqual(JSON.stringify({
-      'event': createdEvent
-    }))
-    expect(ctx.status).toEqual(200);
-  });
-
-  test('Return 200 on getting all events nearby list', async () => {
-    ctx.method = 'GET';
-    await eventController.getEvents(ctx, next);
-    expect(ctx.body).toEqual(JSON.stringify(createdEvent))
-    expect(ctx.status).toEqual(200);
-  }); 
-
-})
-*/

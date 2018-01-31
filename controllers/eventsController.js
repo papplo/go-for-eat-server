@@ -70,45 +70,48 @@ class EventsController {
 
   async deleteEvent (ctx, next)  {
     if ('DELETE' != ctx.method) return await next();
-    const event = await this.Events.findOne({ _id: ctx.params.id, creator: ctx.user._id });
-    if (event && event.attendees.lenght === 1) {
-      try {
-        await this.Events.remove({ _id: ctx.params.id});
-        ctx.status = 204;
-      } catch(e) { console.log('Deleting event error: ', e);}
+    try {
+      const event = await this.Events.findOne({ _id: ctx.params.id, creator: ctx.user._id });
+      if (event && event.attendees.length === 1) await this.Events.remove({ _id: ctx.params.id});
+      else throw `Event not present or only one attendee -> ${Array.isArray(event.attendees)}, ${event.attendees.length}`;   
+      ctx.status = 204;
+    } catch(e) { 
+      console.log('Deleting event error: ', e);
+      ctx.status = 400;
     }
   };
 
   async getEvent (ctx, next) {
     if ('GET' != ctx.method) return await next();
-
-    const event = await this.Events.aggregate([
-      { $match: { _id: this.monk.id(ctx.params.id) } },
-      { $lookup:
-        {
-          from: "users",
-          localField: "attendees",
-          foreignField: "_id",
-          as: "attendees"
+    try {
+      const event = await this.Events.aggregate([
+        { $match: { _id: this.monk.id(ctx.params.id) } },
+        { $lookup:
+          {
+            from: "users",
+            localField: "attendees",
+            foreignField: "_id",
+            as: "attendees"
+          },
         },
-      },
-      { $project: {
-          "attendees.email": 0,
-          "attendees.birthday": 0,
-          "attendees.gender": 0,
-          "attendees.events": 0,
-          "attendees.created_events": 0,
-          "attendees.accessToken": 0,
-          "attendees.ratings_average": 0,
-          "attendees.ratings_number": 0,
-          "attendees.profession": 0,
-          "attendees.description": 0,
-          "attendees.interests": 0
+        { $project: {
+            "attendees.email": 0,
+            "attendees.birthday": 0,
+            "attendees.gender": 0,
+            "attendees.events": 0,
+            "attendees.created_events": 0,
+            "attendees.accessToken": 0,
+            "attendees.ratings_average": 0,
+            "attendees.ratings_number": 0,
+            "attendees.profession": 0,
+            "attendees.description": 0,
+            "attendees.interests": 0
+          }
         }
-      }
-    ]);
-    ctx.status = 200;
-    ctx.body = event;
+      ]);
+      ctx.status = 200;
+      ctx.body = event;
+    } catch(e) { console.log('Get Single Event error', e) }
   };
 
   async joinEvent (ctx, next) {
