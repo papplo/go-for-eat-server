@@ -48,7 +48,7 @@ module.exports.auth = async (ctx, next) => {
 					'Authorization': 'Bearer ' + ctx.request.body.accessToken,
 				}
 			});
-			console.log('authResult', authResult);
+			// console.log('authResult', authResult);
 			if (authResult.data.id == ctx.request.body.id) {
 				const events = await Events.find({events: ctx.request.body.id});
 				const created_events = await Events.find({created_events: ctx.request.body.id});
@@ -99,7 +99,7 @@ module.exports.auth = async (ctx, next) => {
 			}
 		} catch(e) { console.error('Google validate error', e); }
 	} if (ctx.request.body.network == 'linkedin') {
-		console.log('linkedin ctx.request.body', ctx.request.body);
+		// console.log('linkedin ctx.request.body', ctx.request.body);
 	}
 	ctx.status = 400;
 };

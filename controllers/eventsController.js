@@ -27,7 +27,7 @@ class EventsController {
 
   async createEvent (ctx, next) {
     if ('POST' != ctx.method) return await next();
-    console.log(typeof ctx.user._id);
+    console.log(ctx.request.body);
     const newEvent = {
       place_id: ctx.request.body.place_id,
       place_name: ctx.request.body.place_name,
@@ -41,13 +41,14 @@ class EventsController {
       const event = await this.Events.insert(newEvent);
       ctx.status = 200;
       ctx.body = JSON.stringify({'event': event});
-    } catch (e) { console.log('Event create error: ', e);}
-      ctx.status = 400;
+    } catch (e) { 
+      console.log('Event create error: ', e);
+      ctx.status = 500;
+    }
   }
 
  async editEvent (ctx, next) {
     if ('PUT' != ctx.method) return await next();
-    console.log(ctx.request.body);
     try {
       await this.Events.update({ _id: ctx.params.id }, { $set: {
         place_id: ctx.request.body.place_id,
