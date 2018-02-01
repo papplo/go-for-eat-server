@@ -52,8 +52,64 @@ module.exports.auth = async (ctx, next) => {
       });
       console.log('authResult', authResult);
       if (authResult.data.id == ctx.request.body.id) {
-        const events = await Events.find({attendees: ctx.request.body.id});
-        const created_events = await Events.find({creator: ctx.request.body.id});
+        // const events = await Events.find({attendees: ctx.request.body.id});
+        // const created_events = await Events.find({creator: ctx.request.body.id});
+        const events = await Events.aggregate([
+          { $match: {attendees: ctx.request.body.id}},
+          {
+            $lookup:
+							{
+							  from: 'users',
+							  localField: 'attendees',
+							  foreignField: '_id',
+							  as: 'attendees'
+							},
+          },
+          {
+            $project: {
+              'attendees.email': 0,
+              'attendees.birthday': 0,
+              'attendees.gender': 0,
+              'attendees.events': 0,
+              'attendees.created_events': 0,
+              'attendees.accessToken': 0,
+              'attendees.ratings_average': 0,
+              'attendees.ratings_number': 0,
+              'attendees.profession': 0,
+              'attendees.description': 0,
+              'attendees.interests': 0
+            }
+          }
+        ]);
+
+        const created_events = await Events.aggregate([
+          { $match: { creator: ctx.request.body.id } },
+          {
+            $lookup:
+							{
+							  from: 'users',
+							  localField: 'attendees',
+							  foreignField: '_id',					  
+							  as: 'attendees'
+							},
+          },
+          {
+            $project: {
+              'attendees.email': 0,
+              'attendees.birthday': 0,
+              'attendees.gender': 0,
+              'attendees.events': 0,
+              'attendees.created_events': 0,
+              'attendees.accessToken': 0,
+              'attendees.ratings_average': 0,
+              'attendees.ratings_number': 0,
+              'attendees.profession': 0,
+              'attendees.description': 0,
+              'attendees.interests': 0
+            }
+          }
+        ]);
+				
         let user = {
           'name': authResult.data.first_name,
           'email': authResult.data.email,
