@@ -40,8 +40,8 @@ let ctx = {
       place_name: 'asdf',
       place_address: 'asdf',
       location: {
-        lat: 54324,
-        lng: 5523
+        lat: 40.741895,
+        lng: -73.989308,
       },
       when: '3232',
       _id: '6464',
@@ -75,8 +75,8 @@ let emptyDataCtx = {
   }
 };
 
-// Mock context wrong location fields
-let wrongLocationCtx = {
+// Mock context empty location fields
+let emptyLocationCtx = {
   params: {
     id: ''
   },
@@ -89,6 +89,34 @@ let wrongLocationCtx = {
     query: {
       lat: '',
       lng: '',
+      dist:''
+    },
+    body: {
+      place_id: 'aasdf',
+      place_name: 'asdf',
+      place_address: 'asdf',
+      location: '6565',
+      when: '3232',
+      _id: '6464',
+      attendees: []
+    }
+  }
+};
+
+// Mock context empty location fields
+let wrongTypeLocationCtx = {
+  params: {
+    id: ''
+  },
+  method: '',
+  status: 0,
+  user: {
+    _id: 'blabla'
+  },
+  request: {
+    query: {
+      lat: '1fwwe3',
+      lng: '4gtg',
       dist:''
     },
     body: {
@@ -141,9 +169,9 @@ describe('Test correct response on events functions calls', () => {
   });
 
   test('Return 400 on createEvent with wrong location entry fields', async () => {
-    wrongLocationCtx.method = 'POST';
-    await eventController.createEvent(wrongLocationCtx, next);
-    expect(wrongLocationCtx.status).toEqual(400);
+    emptyLocationCtx.method = 'POST';
+    await eventController.createEvent(emptyLocationCtx, next);
+    expect(emptyLocationCtx.status).toEqual(400);
   });
 
   test('Return 204 on edit an event', async () => {
@@ -159,9 +187,9 @@ describe('Test correct response on events functions calls', () => {
   });
 
   test('Return 400 on editEvent with wrong location entry fields', async () => {
-    wrongLocationCtx.method = 'POST';
-    await eventController.editEvent(wrongLocationCtx, next);
-    expect(wrongLocationCtx.status).toEqual(400);
+    emptyLocationCtx.method = 'POST';
+    await eventController.editEvent(emptyLocationCtx, next);
+    expect(emptyLocationCtx.status).toEqual(400);
   });
 
 
@@ -254,10 +282,17 @@ describe('Test on event not found or wrong ID', () => {
 // TODO: verify query params if they from and to are empty, what params do i get?
 describe('Test getEvents on wrong url params', () => {
   test('leaveEvent returns error 400 if url has no position params', async () => {
-    wrongLocationCtx.method = 'GET';
-    wrongLocationCtx.status = 0;
-    await eventControllerNoMatches.getEvents(wrongLocationCtx, next);
-    expect(wrongLocationCtx.status).toEqual(400);
+    emptyLocationCtx.method = 'GET';
+    emptyLocationCtx.status = 0;
+    await eventControllerNoMatches.getEvents(emptyLocationCtx, next);
+    expect(emptyLocationCtx.status).toEqual(400);
+  });
+
+  test('leaveEvent returns error 400 if url has wrong type position params', async () => {
+    wrongTypeLocationCtx.method = 'GET';
+    wrongTypeLocationCtx.status = 0;
+    await eventControllerNoMatches.getEvents(wrongTypeLocationCtx, next);
+    expect(wrongTypeLocationCtx.status).toEqual(400);
   });
 
 });

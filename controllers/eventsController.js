@@ -175,10 +175,14 @@ class EventsController {
   async getEvents (ctx, next) {
     if ('GET' != ctx.method) return await next();
     try {
-      if (ctx.request.query.lat === '' || ctx.request.query.lng === '' ) throw 'Latitude and or Longitude not present';
+      const regexLat = /^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?)$/;
+      const regexLng = /^[-+]?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))(\.\d+)?)$/;
+      if (!ctx.request.query.lat || !ctx.request.query.lng ) throw 'Latitude and or Longitude not present';
+      if (!regexLat.test(ctx.request.query.lat)) throw 'Not valid latitude or Latitude';
+      if (!regexLng.test(ctx.request.query.lng)) throw 'Not valid latitude or Longitude';
       const lat = Number(ctx.request.query.lat);
       const lng = Number(ctx.request.query.lng);
-      // console.log(lat);
+      if (isNaN(lat) || isNaN(lng)) throw 'Lat or Long are not numbers';
       const distance = Number(ctx.request.query.dist) ? Number(ctx.request.query.dist) : 1000;
       const limit = Number(ctx.request.query.limit) ? Number(ctx.request.query.limit) : 100;
       const from = Number(ctx.request.query.from) ? Number(ctx.request.query.from) : Date.now();
