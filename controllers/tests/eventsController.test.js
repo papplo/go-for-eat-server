@@ -88,7 +88,8 @@ let wrongLocationCtx = {
   request: {
     query: {
       lat: '',
-      lng: ''
+      lng: '',
+      dist:''
     },
     body: {
       place_id: 'aasdf',
@@ -130,6 +131,7 @@ describe('Test correct response on events functions calls', () => {
       'event': createdEvent
     }));
     expect(ctx.status).toEqual(201);
+
   });
   
   test('Return 400 on createEvent with empty fields', async () => {
@@ -252,10 +254,10 @@ describe('Test on event not found or wrong ID', () => {
 // TODO: verify query params if they from and to are empty, what params do i get?
 describe('Test getEvents on wrong url params', () => {
   test('leaveEvent returns error 400 if url has no position params', async () => {
-
     wrongLocationCtx.method = 'GET';
     wrongLocationCtx.status = 0;
     await eventControllerNoMatches.getEvents(wrongLocationCtx, next);
     expect(wrongLocationCtx.status).toEqual(400);
   });
+
 });
