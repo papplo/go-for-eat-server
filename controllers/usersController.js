@@ -133,7 +133,7 @@ module.exports.auth = async (ctx, next) => {
       // eslint-disable-next-line no-console
     } catch (e) { console.error('Facebook validate error', e); }
   } else if (ctx.request.body.network == 'google') {
-    // console.log('google ctx.request.body', ctx.request.body);
+    console.log('google ctx.request.body', ctx.request.body);
     try {
       let authResult = await axios.get(config.google.validateUrl + ctx.request.body.idToken, {
         headers: {
