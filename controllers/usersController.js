@@ -122,7 +122,7 @@ module.exports.auth = async (ctx, next) => {
             }
           }
         ]);
-				// console.log('events', events)
+        // console.log('events', events)
         // console.log('user', user);
         if (user.email) {
           ctx.status = 200;
@@ -142,15 +142,22 @@ module.exports.auth = async (ctx, next) => {
       });
       // console.log('authResult', authResult.data);
       if (authResult.data.sub == ctx.request.body.id) {
+        let { data } = await axios.get('https://people.googleapis.com/v1/people/me?personFields=birthdays',
+          {
+            headers: {
+              'Authorization': `Bearer ${ctx.request.body.accessToken}`,
+            }
+          });
+        const birthday = `${data.birthdays[1].date.month}\\${data.birthdays[1].date.day}\\${data.birthdays[1].date.  year}`;
         let user = {
           'name': authResult.data.given_name,
           'email': authResult.data.email,
           'profile_picture': authResult.data.picture,
-          'birthday': 'authResult.data.birthday',
-          'gender': 'authResult.data.gender',
+          'birthday': birthday,
+          'gender': authResult.data.gender,
           'accessToken': 'GO' + ctx.request.body.accessToken,
         };
-        // console.log('user', user);
+        console.log('user', user);
         user = await userDB(user);
         user.events = await Events.aggregate([
           { $match: { attendees: monk.id(user._id) } },
@@ -207,8 +214,9 @@ module.exports.auth = async (ctx, next) => {
             }
           }
         ]);
+
         if (user.email) {
-          console.log('google user', user);
+          // console.log('google user', user);
           ctx.status = 200;
           ctx.body = JSON.stringify({'user': user});
           return;
