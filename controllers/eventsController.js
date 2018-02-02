@@ -135,6 +135,7 @@ class EventsController {
     } catch (e) { 
       // eslint-disable-next-line no-console
       console.error('Update user error', e); 
+      ctx.status = 400; 
     }
   }
 
@@ -168,7 +169,8 @@ class EventsController {
       ctx.status = 200;
     } catch (e) { 
       // eslint-disable-next-line no-console
-      console.error('Leave event error: ', e); 
+      console.error('Leave event error: ', e);
+      ctx.status = 400; 
     }
   }
 

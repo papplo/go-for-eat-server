@@ -281,14 +281,21 @@ describe('Test on event not found or wrong ID', () => {
 
 // TODO: verify query params if they from and to are empty, what params do i get?
 describe('Test getEvents on wrong url params', () => {
-  test('leaveEvent returns error 400 if url has no position params', async () => {
+  test('getEvents returns error 400 if url has no position params', async () => {
     emptyLocationCtx.method = 'GET';
     emptyLocationCtx.status = 0;
     await eventControllerNoMatches.getEvents(emptyLocationCtx, next);
     expect(emptyLocationCtx.status).toEqual(400);
   });
 
-  test('leaveEvent returns error 400 if url has wrong type position params', async () => {
+  test('getEvents returns error 400 if url has wrong type position params', async () => {
+    wrongTypeLocationCtx.method = 'GET';
+    wrongTypeLocationCtx.status = 0;
+    await eventControllerNoMatches.getEvents(wrongTypeLocationCtx, next);
+    expect(wrongTypeLocationCtx.status).toEqual(400);
+  });
+
+  test('getEvents returns error 400 if url has wrong type position params', async () => {
     wrongTypeLocationCtx.method = 'GET';
     wrongTypeLocationCtx.status = 0;
     await eventControllerNoMatches.getEvents(wrongTypeLocationCtx, next);
@@ -296,3 +303,8 @@ describe('Test getEvents on wrong url params', () => {
   });
 
 });
+
+
+// TODO: verify latitude and longitude on moify event
+// + check all aspect of modify event 
+// come posso vedere se la funzione mock database vede i dati esatti?
