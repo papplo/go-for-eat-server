@@ -21,7 +21,7 @@ const monk = require('monk');
 
 
 class EventsController {
-  constructor(Events) {
+  constructor (Events) {
     this.Events = Events;
   }
 
@@ -47,7 +47,7 @@ class EventsController {
     }
   }
 
- async editEvent (ctx, next) {
+  async editEvent (ctx, next) {
     if ('PUT' != ctx.method) return await next();
     try {
       await this.Events.update({ _id: ctx.params.id }, { $set: {
@@ -59,7 +59,7 @@ class EventsController {
       }});
       ctx.status = 204;
     } catch (e) { console.log('Modify create error: ', e); }
-  };
+  }
 
   async deleteEvent (ctx, next)  {
     if ('DELETE' != ctx.method) return await next();
@@ -68,9 +68,9 @@ class EventsController {
       try {
         await this.Events.remove({ _id: ctx.params.id});
         ctx.status = 204;
-      } catch(e) { console.log('Deleting event error: ', e);}
+      } catch (e) { console.log('Deleting event error: ', e);}
     }
-  };
+  }
 
   async getEvent (ctx, next) {
     if ('GET' != ctx.method) return await next();
@@ -79,30 +79,30 @@ class EventsController {
       { $match: { _id: monk.id(ctx.params.id) } },
       { $lookup:
         {
-          from: "users",
-          localField: "attendees",
-          foreignField: "_id",
-          as: "attendees"
+          from: 'users',
+          localField: 'attendees',
+          foreignField: '_id',
+          as: 'attendees'
         },
       },
       { $project: {
-          "attendees.email": 0,
-          "attendees.birthday": 0,
-          "attendees.gender": 0,
-          "attendees.events": 0,
-          "attendees.created_events": 0,
-          "attendees.accessToken": 0,
-          "attendees.ratings_average": 0,
-          "attendees.ratings_number": 0,
-          "attendees.profession": 0,
-          "attendees.description": 0,
-          "attendees.interests": 0
-        }
+        'attendees.email': 0,
+        'attendees.birthday': 0,
+        'attendees.gender': 0,
+        'attendees.events': 0,
+        'attendees.created_events': 0,
+        'attendees.accessToken': 0,
+        'attendees.ratings_average': 0,
+        'attendees.ratings_number': 0,
+        'attendees.profession': 0,
+        'attendees.description': 0,
+        'attendees.interests': 0
+      }
       }
     ]);
     ctx.status = 200;
     ctx.body = event;
-  };
+  }
 
   async joinEvent (ctx, next) {
     if ('PUT' != ctx.method) return await next();
@@ -113,7 +113,7 @@ class EventsController {
       ctx.status = 204;
       console.log( await this.Events.findOne({_id: ctx.params.id}));
     } catch (e) { console.error('Update user error', e); }
-  };
+  }
 
   async leaveEvent (ctx, next) {
     if ('DELETE' != ctx.method) return await next();
@@ -142,7 +142,7 @@ class EventsController {
       ctx.body = JSON.stringify({'event': event});
       ctx.status = 200;
     } catch (e) { console.log('Leave event error: ', e); }
-  };
+  }
 
   async getEvents (ctx, next) {
     if ('GET' != ctx.method) return await next();
@@ -155,41 +155,41 @@ class EventsController {
     console.log(ctx.request.query);
     const events = await this.Events.aggregate([
       { $geoNear: {
-        near: { type: "Point", coordinates: [ lat, lng ] },
-        distanceField: "distance",
+        near: { type: 'Point', coordinates: [ lat, lng ] },
+        distanceField: 'distance',
         maxDistance: distance,
         query: { when: { $gte: from , $lte: to } },
         limit: limit,
         spherical: true
       }
-    },
-    { $lookup:
-      {
-        from: "users",
-        localField: "attendees",
-        foreignField: "_id",
-        as: "attendees"
       },
-    },
-    { $project: {
-        "attendees.email": 0,
-        "attendees.birthday": 0,
-        "attendees.gender": 0,
-        "attendees.events": 0,
-        "attendees.created_events": 0,
-        "attendees.accessToken": 0,
-        "attendees.ratings_average": 0,
-        "attendees.ratings_number": 0,
-        "attendees.profession": 0,
-        "attendees.description": 0,
-        "attendees.interests": 0
+      { $lookup:
+      {
+        from: 'users',
+        localField: 'attendees',
+        foreignField: '_id',
+        as: 'attendees'
+      },
+      },
+      { $project: {
+        'attendees.email': 0,
+        'attendees.birthday': 0,
+        'attendees.gender': 0,
+        'attendees.events': 0,
+        'attendees.created_events': 0,
+        'attendees.accessToken': 0,
+        'attendees.ratings_average': 0,
+        'attendees.ratings_number': 0,
+        'attendees.profession': 0,
+        'attendees.description': 0,
+        'attendees.interests': 0
       }
-    }
-  ]);
+      }
+    ]);
     console.log('events', events);
     ctx.status = 200;
     ctx.body = JSON.stringify(events);
-  };
+  }
 }
 
 module.exports = EventsController;
