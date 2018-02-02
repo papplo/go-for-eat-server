@@ -123,7 +123,7 @@ module.exports.auth = async (ctx, next) => {
           }
         ]);
 				// console.log('events', events)
-        // console.log('user', user.events);
+        // console.log('user', user);
         if (user.email) {
           ctx.status = 200;
           ctx.body = JSON.stringify({'user': user});
@@ -133,14 +133,14 @@ module.exports.auth = async (ctx, next) => {
       // eslint-disable-next-line no-console
     } catch (e) { console.error('Facebook validate error', e); }
   } else if (ctx.request.body.network == 'google') {
-    console.log('google ctx.request.body', ctx.request.body);
+    // console.log('google ctx.request.body', ctx.request.body);
     try {
       let authResult = await axios.get(config.google.validateUrl + ctx.request.body.idToken, {
         headers: {
           'Authorization': 'Bearer ' + ctx.request.body.accessToken,
         }
       });
-      console.log('authResult', authResult.data);
+      // console.log('authResult', authResult.data);
       if (authResult.data.sub == ctx.request.body.id) {
         let user = {
           'name': authResult.data.given_name,
@@ -152,7 +152,63 @@ module.exports.auth = async (ctx, next) => {
         };
         // console.log('user', user);
         user = await userDB(user);
+        user.events = await Events.aggregate([
+          { $match: { attendees: monk.id(user._id) } },
+          {
+            $lookup:
+              {
+                from: 'users',
+                localField: 'attendees',
+                foreignField: '_id',
+                as: 'attendees'
+              },
+          },
+          {
+            $project: {
+              'attendees.email': 0,
+              'attendees.birthday': 0,
+              'attendees.gender': 0,
+              'attendees.events': 0,
+              'attendees.created_events': 0,
+              'attendees.accessToken': 0,
+              'attendees.ratings_average': 0,
+              'attendees.ratings_number': 0,
+              'attendees.profession': 0,
+              'attendees.description': 0,
+              'attendees.interests': 0
+            }
+          }
+        ]);
+
+        user.created_events = await Events.aggregate([
+          { $match: { creator: monk.id(user._id) } },
+          {
+            $lookup:
+              {
+                from: 'users',
+                localField: 'attendees',
+                foreignField: '_id',
+                as: 'attendees'
+              },
+          },
+          {
+            $project: {
+              'attendees.email': 0,
+              'attendees.birthday': 0,
+              'attendees.gender': 0,
+              'attendees.events': 0,
+              'attendees.created_events': 0,
+              'attendees.accessToken': 0,
+              'attendees.ratings_average': 0,
+              'attendees.ratings_number': 0,
+              'attendees.profession': 0,
+              'attendees.description': 0,
+              'attendees.interests': 0
+            }
+          }
+        ]);
         if (user.email) {
+          console.log('google user', user);
           ctx.status = 200;
           ctx.body = JSON.stringify({'user': user});
           return;
