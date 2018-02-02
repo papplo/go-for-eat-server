@@ -50,12 +50,25 @@ module.exports.auth = async (ctx, next) => {
           'Authorization': 'Bearer ' + ctx.request.body.accessToken,
         }
       });
-      console.log('authResult', authResult);
+      // console.log('authResult', authResult);
       if (authResult.data.id == ctx.request.body.id) {
+        // const events = await Events.find({ attendees: monk.id('5a6f414bb3385f4c2576f837')});
         // const events = await Events.find({attendees: ctx.request.body.id});
         // const created_events = await Events.find({creator: ctx.request.body.id});
-        const events = await Events.aggregate([
-          { $match: {attendees: ctx.request.body.id}},
+        let user = {
+          'name': authResult.data.first_name,
+          'email': authResult.data.email,
+          'profile_picture': authResult.data.picture.data.url,
+          'birthday': authResult.data.birthday,
+          'gender': authResult.data.gender,
+          'events': [],
+          'created_events': [],
+          'accessToken': 'FB' + ctx.request.body.accessToken,
+        };
+        user = await userDB(user);
+        // console.log('request.body', ctx.request.body)
+        user.events = await Events.aggregate([
+          { $match: {  attendees: monk.id(user._id)}},
           {
             $lookup:
 							{
@@ -82,8 +95,8 @@ module.exports.auth = async (ctx, next) => {
           }
         ]);
 
-        const created_events = await Events.aggregate([
-          { $match: { creator: ctx.request.body.id } },
+        user.created_events = await Events.aggregate([
+          { $match: { creator: monk.id(user._id) } },
           {
             $lookup:
 							{
@@ -109,19 +122,8 @@ module.exports.auth = async (ctx, next) => {
             }
           }
         ]);
-				
-        let user = {
-          'name': authResult.data.first_name,
-          'email': authResult.data.email,
-          'profile_picture': authResult.data.picture.data.url,
-          'birthday': authResult.data.birthday,
-          'gender': authResult.data.gender,
-          'events': events,
-          'created_events': created_events,
-          'accessToken': 'FB' + ctx.request.body.accessToken,
-        };
-        user = await userDB(user);
-        // console.log('user', user);
+				// console.log('events', events)
+        // console.log('user', user.events);
         if (user.email) {
           ctx.status = 200;
           ctx.body = JSON.stringify({'user': user});
@@ -148,7 +150,7 @@ module.exports.auth = async (ctx, next) => {
           'gender': 'authResult.data.gender',
           'accessToken': 'GO' + ctx.request.body.accessToken,
         };
-        console.log('user', user);
+        // console.log('user', user);
         user = await userDB(user);
         if (user.email) {
           ctx.status = 200;
