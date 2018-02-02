@@ -247,18 +247,20 @@ module.exports.me = async (ctx, next) => {
   ctx.body = ctx.user;
 };
 
+// TODO check the db and compare the body
 module.exports.edit = async (ctx, next) => {
   if ('PUT' != ctx.method) return await next();
   try {
+    // let fieldsToEdit = ctx.body.request.edit;
+
     await Users.update({_id: ctx.user._id}, ctx.request.body.edit);
-    // the recived object should be like this:
     // ctx.request.body.edit =
     // {
     //   'interests': [tennis , video games, food],
-    //   'description': 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-    //   'profession': 'Full stack developer'
+    //   // 'description': 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+    //   // 'profession': 'Full stack developer'
     // }
+    ctx.status = 204;
     // eslint-disable-next-line no-console
   } catch (e) { console.error('Edit user error', e); }
-  ctx.status = 204;
 };
