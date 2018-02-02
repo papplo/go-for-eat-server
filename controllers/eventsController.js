@@ -82,7 +82,7 @@ class EventsController {
     if ('DELETE' != ctx.method) return await next();
     try {
       const event = await this.Events.findOne({ _id: ctx.params.id, creator: ctx.user._id });
-      if (event && event.attendees.length === 1) await this.Events.remove({ _id: ctx.params.id});
+      if (event && event.attendees.length === 1) await this.Events.remove({ _id: this.monk.id(ctx.params.id)});
       else throw `Event not present or only one attendee -> ${Array.isArray(event.attendees)}, ${event.attendees.length}`;   
       ctx.status = 204;
     } catch (e) { 
@@ -241,3 +241,5 @@ class EventsController {
 }
 
 module.exports = EventsController;
+
+
