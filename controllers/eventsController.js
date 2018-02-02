@@ -11,6 +11,7 @@ class EventsController {
 
   async createEvent (ctx, next) {
     if ('POST' != ctx.method) return await next();
+
     // console.log(typeof ctx.user._id);
     const newEvent = {
       place_id: ctx.request.body.place_id,
@@ -44,7 +45,6 @@ class EventsController {
   
   async editEvent (ctx, next) {
     if ('PUT' != ctx.method) return await next();
-    // console.log(ctx.request.body);
     try {
       const regexLat = /^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?)$/;
       const regexLng = /^[-+]?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))(\.\d+)?)$/;
