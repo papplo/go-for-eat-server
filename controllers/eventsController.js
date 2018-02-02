@@ -41,26 +41,32 @@ class EventsController {
       ctx.status = 400;
     }
   }
-
+  
   async editEvent (ctx, next) {
     if ('PUT' != ctx.method) return await next();
     // console.log(ctx.request.body);
     try {
+      const regexLat = /^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?)$/;
+      const regexLng = /^[-+]?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))(\.\d+)?)$/;
       for (const key in ctx.request.body) {
-        // console.log('here', [key])
         if (!ctx.request.body[key]) throw `Empty parameter ${[key]}`;
-        if (!ctx.request.body.location.lat || typeof ctx.request.body.location.lat !== 'number' ) {
-          throw 'Latitude field not present or not a number';
+        // console.log('here', [key])
+        if (!ctx.request.body.location.lat || !regexLat.test(ctx.request.body.location.lat) ) {
+          throw 'Latitude field not present or not an accepted number';
         }
-        if (!ctx.request.body.location.lng || typeof ctx.request.body.location.lng !== 'number' ) {
-          throw 'Longitude field not present or not a number';
+        if (!ctx.request.body.location.lng || !regexLng.test(ctx.request.body.location.lng) ) {
+          throw 'Longitude field not present or not an accepted number';
         }
       }
+      const indexedDbPosition = { 
+        type: 'Point', 
+        coordinates: [ctx.request.body.location.lat, ctx.request.body.location.lng] 
+      };
       const updateResult = await this.Events.update({ _id: ctx.params.id }, { $set: {
         place_id: ctx.request.body.place_id,
         place_name: ctx.request.body.place_name,
         place_address: ctx.request.body.place_address,
-        location: ctx.request.body.location,
+        location: indexedDbPosition,
         when: ctx.request.body.when,
       }});
       if (updateResult.nMatched === 0) throw `Event ${ctx.params.id} not found`;

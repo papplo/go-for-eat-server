@@ -295,16 +295,15 @@ describe('Test getEvents on wrong url params', () => {
     expect(wrongTypeLocationCtx.status).toEqual(400);
   });
 
-  test('getEvents returns error 400 if url has wrong type position params', async () => {
-    wrongTypeLocationCtx.method = 'GET';
+  test('editEvent returns error 400 if request body has wrong type position params', async () => {
+    wrongTypeLocationCtx.method = 'PUT';
     wrongTypeLocationCtx.status = 0;
-    await eventControllerNoMatches.getEvents(wrongTypeLocationCtx, next);
+    await eventControllerNoMatches.editEvent(wrongTypeLocationCtx, next);
     expect(wrongTypeLocationCtx.status).toEqual(400);
   });
 
 });
 
 
-// TODO: verify latitude and longitude on moify event
 // + check all aspect of modify event 
 // come posso vedere se la funzione mock database vede i dati esatti?
