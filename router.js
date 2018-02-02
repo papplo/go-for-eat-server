@@ -1,23 +1,23 @@
 'use strict';
+const router = require('koa-router')();
 
 const usersController = require('./controllers/usersController');
 const EventsController = require('./controllers/eventsController');
 const ratingsController = require('./controllers/ratingsController');
 
+// MongoDb configure
 const monk = require('monk');
 const db = monk(process.env.MONGOLAB_URI);
 
+// Creating Db instances
 const Events = db.get('events');
 const Users = db.get('users');
 
-
+// Geo Indexing for MongoDb 
 Events.createIndex( { location : "2dsphere" } );
 
+const eventsController = new EventsController(Events, monk);
 
-const eventsController = new EventsController(Events);
-
-
-const router = require('koa-router')();
 
 const authorize = async (ctx, next) => {
 	if (!ctx.user) {
