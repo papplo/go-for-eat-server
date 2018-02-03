@@ -2,13 +2,15 @@
 
 const config = require('../config.js');
 
+const regexLat = /^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?)$/;
+const regexLng = /^[-+]?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))(\.\d+)?)$/;
 
 class EventsController {
   constructor (Events, monk) {
     this.Events = Events;
     this.monk = monk;
   }
-
+  
   async createEvent (ctx, next) {
     if ('POST' != ctx.method) return await next();
 
@@ -26,13 +28,11 @@ class EventsController {
       for (const key in newEvent) {
         // console.log('here', [key])
         if (!newEvent[key]) throw `Empty parameter ${[key]}`;
-        if (!ctx.request.body.location.lat || typeof ctx.request.body.location.lat !== 'number' ) {
-          throw 'Latitude field not present or not a number';
-        }
-        if (!ctx.request.body.location.lng || typeof ctx.request.body.location.lng !== 'number' ) {
-          throw 'Longitude field not present or not a number';
-        }
       }
+      if (!ctx.request.body.location.coordinates[1] || !ctx.request.body.location.coordinates[0] ) throw 'Latitude and or Longitude not present';
+      if (!regexLat.test(ctx.request.body.location.coordinates[0])) throw 'Not valid latitude or Latitude';
+      if (!regexLng.test(ctx.request.body.location.coordinates[1])) throw 'Not valid latitude or Longitude';
+  
       const event = await this.Events.insert(newEvent);
       ctx.status = 201;
       ctx.body = JSON.stringify({'event': event});
@@ -46,27 +46,25 @@ class EventsController {
   async editEvent (ctx, next) {
     if ('PUT' != ctx.method) return await next();
     try {
-      const regexLat = /^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?)$/;
-      const regexLng = /^[-+]?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))(\.\d+)?)$/;
       for (const key in ctx.request.body) {
         if (!ctx.request.body[key]) throw `Empty parameter ${[key]}`;
         // console.log('here', [key])
-        if (!ctx.request.body.location.lat || !regexLat.test(ctx.request.body.location.lat) ) {
-          throw 'Latitude field not present or not an accepted number';
-        }
-        if (!ctx.request.body.location.lng || !regexLng.test(ctx.request.body.location.lng) ) {
-          throw 'Longitude field not present or not an accepted number';
-        }
       }
-      const indexedDbPosition = { 
-        type: 'Point', 
-        coordinates: [ctx.request.body.location.lat, ctx.request.body.location.lng] 
-      };
+      if (!ctx.request.body.location.coordinates[0] || !regexLat.test(ctx.request.body.location.coordinates[0]) ) {
+        throw 'Latitude field not present or not an accepted number';
+      }
+      if (!ctx.request.body.location.coordinates[1] || !regexLng.test(ctx.request.body.location.coordinates[1]) ) {
+        throw 'Longitude field not present or not an accepted number';
+      }
+      // const indexedDbPosition = { 
+      //   type: 'Point', 
+      //   coordinates: [ctx.request.body.location.lat, ctx.request.body.location.lng] 
+      // };
       const updateResult = await this.Events.update({ _id: ctx.params.id }, { $set: {
         place_id: ctx.request.body.place_id,
         place_name: ctx.request.body.place_name,
         place_address: ctx.request.body.place_address,
-        location: indexedDbPosition,
+        location: ctx.request.body.location,
         when: ctx.request.body.when,
       }});
       if (updateResult.nMatched === 0) throw `Event ${ctx.params.id} not found`;
@@ -183,8 +181,6 @@ class EventsController {
   async getEvents (ctx, next) {
     if ('GET' != ctx.method) return await next();
     try {
-      const regexLat = /^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?)$/;
-      const regexLng = /^[-+]?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))(\.\d+)?)$/;
       if (!ctx.request.query.lat || !ctx.request.query.lng ) throw 'Latitude and or Longitude not present';
       if (!regexLat.test(ctx.request.query.lat)) throw 'Not valid latitude or Latitude';
       if (!regexLng.test(ctx.request.query.lng)) throw 'Not valid latitude or Longitude';
