@@ -34,7 +34,7 @@ const routes = function (app) {
     .post('/api/v1/auth', usersController.auth)
     .get('/api/v1/users/:id', authorize, usersController.getUser.bind(usersController))
     .get('/api/v1/me', authorize, usersController.me.bind(usersController))
-    .put('/api/v1/me', authorize, usersController.edit.bind(usersController))
+    .put('/api/v1/me', authorize, usersController.editUser.bind(usersController))
     .put('/api/v1/users/:id', authorize, ratingsController.rating.bind(usersController))
 
     .post('/api/v1/events', authorize, eventsController.createEvent.bind(eventsController))
