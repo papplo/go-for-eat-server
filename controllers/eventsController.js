@@ -13,8 +13,6 @@ class EventsController {
   
   async createEvent (ctx, next) {
     if ('POST' != ctx.method) return await next();
-
-    // console.log(typeof ctx.user._id);
     const newEvent = {
       place_id: ctx.request.body.place_id,
       place_name: ctx.request.body.place_name,
@@ -26,13 +24,11 @@ class EventsController {
     };
     try {
       for (const key in newEvent) {
-        // console.log('here', [key])
         if (!newEvent[key]) throw `Empty parameter ${[key]}`;
       }
       if (!ctx.request.body.location.coordinates[1] || !ctx.request.body.location.coordinates[0] ) throw 'Latitude and or Longitude not present';
       if (!regexLat.test(ctx.request.body.location.coordinates[0])) throw 'Not valid latitude or Latitude';
       if (!regexLng.test(ctx.request.body.location.coordinates[1])) throw 'Not valid latitude or Longitude';
-  
       const event = await this.Events.insert(newEvent);
       ctx.status = 201;
       ctx.body = JSON.stringify({'event': event});
@@ -48,7 +44,6 @@ class EventsController {
     try {
       for (const key in ctx.request.body) {
         if (!ctx.request.body[key]) throw `Empty parameter ${[key]}`;
-        // console.log('here', [key])
       }
       if (!ctx.request.body.location.coordinates[0] || !regexLat.test(ctx.request.body.location.coordinates[0]) ) {
         throw 'Latitude field not present or not an accepted number';
@@ -56,10 +51,6 @@ class EventsController {
       if (!ctx.request.body.location.coordinates[1] || !regexLng.test(ctx.request.body.location.coordinates[1]) ) {
         throw 'Longitude field not present or not an accepted number';
       }
-      // const indexedDbPosition = { 
-      //   type: 'Point', 
-      //   coordinates: [ctx.request.body.location.lat, ctx.request.body.location.lng] 
-      // };
       const updateResult = await this.Events.update({ _id: ctx.params.id }, { $set: {
         place_id: ctx.request.body.place_id,
         place_name: ctx.request.body.place_name,
@@ -80,7 +71,7 @@ class EventsController {
     if ('DELETE' != ctx.method) return await next();
     try {
       const event = await this.Events.findOne({ _id: ctx.params.id, creator: ctx.user._id });
-      if (event && event.attendees.length === 1) await this.Events.remove({ _id: ctx.params.id});
+      if (event && event.attendees.length === 1) await this.Events.remove({ _id: this.monk.id(ctx.params.id)});
       else throw `Event not present or only one attendee -> ${Array.isArray(event.attendees)}, ${event.attendees.length}`;   
       ctx.status = 204;
     } catch (e) { 
@@ -154,8 +145,6 @@ class EventsController {
     // console.log('event', event);
     if ( JSON.stringify(event.creator) === JSON.stringify(ctx.user._id) ) {
       event.creator = event.attendees[1];
-      // eslint-disable-next-line no-console
-      // console.log('event.attendees[1]', event.attendees[1]);
     }
     try {
       let update = await this.Events.update(
@@ -168,7 +157,6 @@ class EventsController {
         }
       );
       event = await this.Events.findOne({ _id: ctx.params.id });
-      // console.log('updated event', event);
       ctx.body = JSON.stringify({'event': event});
       ctx.status = 200;
     } catch (e) { 
@@ -186,12 +174,10 @@ class EventsController {
       if (!regexLng.test(ctx.request.query.lng)) throw 'Not valid latitude or Longitude';
       const lat = Number(ctx.request.query.lat);
       const lng = Number(ctx.request.query.lng);
-      if (isNaN(lat) || isNaN(lng)) throw 'Lat or Long are not numbers';
       const distance = Number(ctx.request.query.dist) ? Number(ctx.request.query.dist) : 1000;
       const limit = Number(ctx.request.query.limit) ? Number(ctx.request.query.limit) : 100;
       const from = Number(ctx.request.query.from) ? Number(ctx.request.query.from) : Date.now();
       const to = Number(ctx.request.query.to) ? Number(ctx.request.query.to) : Date.now() + 3600*24*7;
-      // console.log(ctx.request.query);
       const events = await this.Events.aggregate([
         { $geoNear: {
           near: { type: 'Point', coordinates: [ lat, lng ] },
@@ -225,7 +211,6 @@ class EventsController {
         }
         }
       ]);
-      // console.log('events', events);
       ctx.status = 200;
       ctx.body = JSON.stringify(events);
     } catch (e) { 
@@ -237,3 +222,5 @@ class EventsController {
 }
 
 module.exports = EventsController;
+
+
