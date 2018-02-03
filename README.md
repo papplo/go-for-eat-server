@@ -3,7 +3,9 @@
 <div align="center">
 <img src="https://github.com/sergipt/go-for-eat-server/blob/feature/documentation/assets/appIcone.png?raw=true">
 </div>
+
 # Backend source files for Go 4 Eat App
+
 <div align="center">
 This backend supports Google and Facebook `OAuth2.0` authentication and provides DB for users and events
 created by the app.
