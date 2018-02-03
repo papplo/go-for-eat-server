@@ -3,11 +3,11 @@ const axios = require('axios');
 const config = require('../config.js');
 const filterProps = require('../services/utils').filterProps;
 
-const monk = require('monk');
-const db = monk(process.env.MONGOLAB_URI);
+// const monk = require('monk');
+// const db = monk(process.env.MONGOLAB_URI);
 
-const Events = db.get('events');
-const Users = db.get('users');
+// const Events = db.get('events');
+// const Users = db.get('users');
 
 class UsersController {
   constructor (Users, Events, monk) {

@@ -1,7 +1,7 @@
 'use strict';
 const router = require('koa-router')();
 
-const usersController = require('./controllers/usersController');
+const UsersController = require('./controllers/usersController');
 const EventsController = require('./controllers/eventsController');
 const ratingsController = require('./controllers/ratingsController');
 
@@ -17,6 +17,7 @@ const Users = db.get('users');
 Events.createIndex( { location : "2dsphere" } );
 
 const eventsController = new EventsController(Events, monk);
+const usersController = new UsersController(Users, Events, monk);
 
 
 const authorize = async (ctx, next) => {
@@ -31,10 +32,10 @@ const authorize = async (ctx, next) => {
 const routes = function (app) {
 	router
 		.post('/api/v1/auth', usersController.auth)
-		.get('/api/v1/users/:id', authorize, usersController.getUser)
-		.get('/api/v1/me', authorize, usersController.me)
-		.put('/api/v1/me', authorize, usersController.edit)
-		.put('/api/v1/users/:id', authorize, ratingsController.rating)
+		.get('/api/v1/users/:id', authorize, usersController.getUser.bind(usersController))
+		.get('/api/v1/me', authorize, usersController.me.bind(usersController))
+		.put('/api/v1/me', authorize, usersController.edit.bind(usersController))
+		.put('/api/v1/users/:id', authorize, ratingsController.rating.bind(usersController))
 
 		.post('/api/v1/events', authorize, eventsController.createEvent.bind(eventsController))
 		.put('/api/v1/events/:id', authorize, eventsController.editEvent.bind(eventsController))
