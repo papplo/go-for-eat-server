@@ -232,11 +232,15 @@ class UsersController {
     if ('GET' != ctx.method) return await next();
     try {
       let user = await this.Users.findOne({ _id: ctx.params.id });
+      if (user === null) throw `User ${ctx.params.id} not found in Db`;
       user = filterProps(user, ['_id', 'name', 'profile_picture', 'gender', 'birthday', 'ratings_number', 'ratings_average', 'interests', 'description', 'profession']);
       ctx.status = 200;
       ctx.body = user;
-    // eslint-disable-next-line no-console
-    } catch (e) { console.error('Get user error', e); }
+    } catch (e) { 
+      // eslint-disable-next-line no-console
+      console.error('Get user error', e);
+      cts.status = 404;
+    }
   }
 
   async me (ctx, next) {
@@ -245,7 +249,7 @@ class UsersController {
     ctx.body = ctx.user;
   }
 
-  async edit (ctx, next) {
+  async editUser (ctx, next) {
     if ('PUT' != ctx.method) return await next();
     try {
       if (ctx.request.body.edit.interests && ctx.request.body.edit.interests.length >= 4) {
@@ -255,13 +259,16 @@ class UsersController {
         ctx.request.body.edit.description = ctx.request.body.edit.description.substring(0, 139);
       }
       if (ctx.request.body.edit.profession && ctx.request.body.edit.profession.length >= 4) {
-        ctx.request.body.edit.profession = ctx.request.body.edit.profession.substring(0, 139);
+        ctx.request.body.edit.profession = ctx.request.body.edit.profession.substring(0, 140);
       }
-      await this.Users.update({ _id: ctx.user._id }, ctx.request.body.edit);
-      // eslint-disable-next-line no-console
+      const user = await this.Users.update({ _id: ctx.user._id }, ctx.request.body.edit);
+      if (user.nMatched === 0) throw `User ${ctx.params.id} not found in Db`;
       ctx.status = 204;
+    } catch (e) { 
       // eslint-disable-next-line no-console
-    } catch (e) { console.error('Edit user error', e); }
+      console.error('Edit user error', e);
+      ctx.status= 404;
+    }
   }
 }
 
