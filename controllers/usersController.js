@@ -3,15 +3,9 @@ const axios = require('axios');
 const config = require('../config.js');
 const filterProps = require('../services/utils').filterProps;
 
-// const monk = require('monk');
-// const db = monk(process.env.MONGOLAB_URI);
-
-// const Events = db.get('events');
-// const Users = db.get('users');
-
 class UsersController {
   constructor (Users, Events, monk) {
-    this.Users = this.Users;
+    this.Users = Users;
     this.Events = Events;
     this.monk = monk;
   }
@@ -60,9 +54,6 @@ class UsersController {
         });
         // console.log('authResult', authResult);
         if (authResult.data.id == ctx.request.body.id) {
-        // const events = await Events.find({ attendees: this.monk.id('5a6f414bb3385f4c2576f837')});
-        // const events = await Events.find({attendees: ctx.request.body.id});
-        // const created_events = await Events.find({creator: ctx.request.body.id});
           let user = {
             'name': authResult.data.first_name,
             'email': authResult.data.email,
@@ -257,17 +248,25 @@ class UsersController {
   async edit (ctx, next) {
     if ('PUT' != ctx.method) return await next();
     try {
+      if (ctx.request.body.edit.interests && ctx.request.body.edit.interests.length >= 4) {
+        ctx.request.body.edit.interests.splice(4);
+      }
+      if (ctx.request.body.edit.description && ctx.request.body.edit.description.length >= 4) {
+        ctx.request.body.edit.description = ctx.request.body.edit.description.substring(0, 139);
+      }
+
       await this.Users.update({ _id: ctx.user._id }, ctx.request.body.edit);
-    // the recived object should be like this:
-    // ctx.request.body.edit =
-    // {
-    //   'interests': [tennis , video games, food],
-    //   'description': 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-    //   'profession': 'Full stack developer'
-    // }
-    // eslint-disable-next-line no-console
+      // the recived object should be like this:
+      // ctx.request.body.edit =
+      // {
+      //   'interests': [tennis , video games, food],
+      //   'description': 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+      //   'profession': 'Full stack developer'
+      // }
+      // eslint-disable-next-line no-console
+      ctx.status = 204;
+      // eslint-disable-next-line no-console
     } catch (e) { console.error('Edit user error', e); }
-    ctx.status = 204;
   }
 }
 
