@@ -40,8 +40,8 @@ let ctx = {
       place_name: 'asdf',
       place_address: 'asdf',
       location: {
-        lat: 40.741895,
-        lng: -73.989308,
+        type: 'Point',
+        coordinates: [40.741895, -73.989308]
       },
       when: '3232',
       _id: '6464',
@@ -50,7 +50,7 @@ let ctx = {
   }
 };
 
-// Mock context
+// Mock contextctx.rectx.request.query.latquest.query.lat
 let emptyDataCtx = {
   params: {
     id: ''
