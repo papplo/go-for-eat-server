@@ -254,15 +254,10 @@ class UsersController {
       if (ctx.request.body.edit.description && ctx.request.body.edit.description.length >= 4) {
         ctx.request.body.edit.description = ctx.request.body.edit.description.substring(0, 139);
       }
-
+      if (ctx.request.body.edit.profession && ctx.request.body.edit.profession.length >= 4) {
+        ctx.request.body.edit.profession = ctx.request.body.edit.profession.substring(0, 139);
+      }
       await this.Users.update({ _id: ctx.user._id }, ctx.request.body.edit);
-      // the recived object should be like this:
-      // ctx.request.body.edit =
-      // {
-      //   'interests': [tennis , video games, food],
-      //   'description': 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-      //   'profession': 'Full stack developer'
-      // }
       // eslint-disable-next-line no-console
       ctx.status = 204;
       // eslint-disable-next-line no-console
