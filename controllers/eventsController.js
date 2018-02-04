@@ -203,18 +203,20 @@ class EventsController {
           'attendees.events': 0,
           'attendees.created_events': 0,
           'attendees.accessToken': 0,
-          'attendees.ratings_average': 0,
           'attendees.ratings_number': 0,
           'attendees.profession': 0,
           'attendees.description': 0,
           'attendees.interests': 0
-        }
-        }
+        },
+        },
+        { $sort: { 'attendees':-1 } },
+        { $sort: { 'attendees.ratings_average':-1 } }
       ]);
+      console.log(events);
       ctx.status = 200;
       ctx.body = JSON.stringify(events);
     } catch (e) { 
-      // eslint-disable-next-line no-console
+    // eslint-disable-next-line no-console
       console.error( `getEvents error ${e}`);
       ctx.status = 400; 
     }
@@ -224,3 +226,5 @@ class EventsController {
 module.exports = EventsController;
 
 
+
+// 'attendees.ratings_average': 0,

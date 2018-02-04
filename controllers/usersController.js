@@ -64,7 +64,7 @@ class UsersController {
             'created_events': [],
             'accessToken': 'FB' + ctx.request.body.accessToken,
           };
-          user = await _userDB(user);
+          user = await this._userDB(user);
           // console.log('request.body', ctx.request.body)
           user.events = await this.Events.aggregate([
             { $match: { attendees: this.monk.id(user._id) } },
@@ -95,7 +95,7 @@ class UsersController {
           ]);
 
           user.created_events = await this.Events.aggregate([
-            { $match: { creator: this.this.monk.id(user._id) } },
+            { $match: { creator: this.monk.id(user._id) } },
             {
               $lookup: {
                 from: 'users',
@@ -156,7 +156,7 @@ class UsersController {
             'accessToken': 'GO' + ctx.request.body.accessToken,
           };
           // console.log('user', user);
-          user = await _userDB(user);
+          user = await this._userDB(user);
           user.events = await this.Events.aggregate([
             { $match: { attendees: this.monk.id(user._id) } },
             {
