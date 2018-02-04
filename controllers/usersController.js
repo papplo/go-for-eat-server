@@ -159,12 +159,9 @@ class UsersController {
               Authorization: `Bearer ${ctx.request.body.accessToken}`
             }
           });
-          const birthday =
-            data.birthdays[1].date.month +
-            '\\' +
-            data.birthdays[1].date.day +
-            '\\' +
-            data.birthdays[1].date.year;
+          const birthday = `${data.birthdays[1].date.month}/${
+            data.birthdays[1].date.day
+          }/${data.birthdays[1].date.year}`;
           let user = {
             name: authResult.data.given_name,
             email: authResult.data.email,
