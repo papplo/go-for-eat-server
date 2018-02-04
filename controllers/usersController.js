@@ -199,7 +199,7 @@ class UsersController {
             }
           ]);
 
-          user.created_events = await Events.aggregate([
+          user.created_events = await this.Events.aggregate([
             { $match: { creator: this.monk.id(user._id) } },
             {
               $lookup: {
@@ -258,6 +258,59 @@ class UsersController {
             accessToken: 'LI' + ctx.request.body.accessToken
           };
           user = await this._userDB(user);
+          user.events = await this.Events.aggregate([
+            { $match: { attendees: this.monk.id(user._id) } },
+            {
+              $lookup: {
+                from: 'users',
+                localField: 'attendees',
+                foreignField: '_id',
+                as: 'attendees'
+              }
+            },
+            {
+              $project: {
+                'attendees.email': 0,
+                'attendees.birthday': 0,
+                'attendees.gender': 0,
+                'attendees.events': 0,
+                'attendees.created_events': 0,
+                'attendees.accessToken': 0,
+                'attendees.ratings_average': 0,
+                'attendees.ratings_number': 0,
+                'attendees.profession': 0,
+                'attendees.description': 0,
+                'attendees.interests': 0
+              }
+            }
+          ]);
+
+          user.created_events = await this.Events.aggregate([
+            { $match: { creator: this.monk.id(user._id) } },
+            {
+              $lookup: {
+                from: 'users',
+                localField: 'attendees',
+                foreignField: '_id',
+                as: 'attendees'
+              }
+            },
+            {
+              $project: {
+                'attendees.email': 0,
+                'attendees.birthday': 0,
+                'attendees.gender': 0,
+                'attendees.events': 0,
+                'attendees.created_events': 0,
+                'attendees.accessToken': 0,
+                'attendees.ratings_average': 0,
+                'attendees.ratings_number': 0,
+                'attendees.profession': 0,
+                'attendees.description': 0,
+                'attendees.interests': 0
+              }
+            }
+          ]);
 
           if (user.email) {
             // console.log('google user', user);
