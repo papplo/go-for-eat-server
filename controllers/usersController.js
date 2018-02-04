@@ -20,7 +20,7 @@ class UsersController {
         userData.ratings_number = userData.ratings_average = '0';
         userData.description = userData.profession = '';
         userData.interests = [];
-        return this.Users.insert(userData);
+        return await this.Users.insert(userData);
       } catch (e) {
         // eslint-disable-next-line no-console
         console.error('this.Users.insert', e);
@@ -154,14 +154,11 @@ class UsersController {
         );
         // console.log('authResult', authResult.data);
         if (authResult.data.sub == ctx.request.body.id) {
-          const { data } = await axios.get(
-            'https://people.googleapis.com/v1/people/me?personFields=birthdays',
-            {
-              headers: {
-                Authorization: `Bearer ${ctx.request.body.accessToken}`
-              }
+          const { data } = await axios.get(config.google.birthdayRequest, {
+            headers: {
+              Authorization: `Bearer ${ctx.request.body.accessToken}`
             }
-          );
+          });
           const birthday = `${data.birthdays[1].date.month}\\${
             data.birthdays[1].date.day
           }\\${data.birthdays[1].date.year}`;
@@ -240,11 +237,41 @@ class UsersController {
         // eslint-disable-next-line no-console
         console.error('Google validate error', e);
       }
-    }
-    if (ctx.request.body.network == 'linkedin') {
+    } else if (ctx.request.body.network == 'linkedin') {
       // console.log('linkedin ctx.request.body', ctx.request.body);
+      try {
+        const authResult = await axios.get(config.linkedin.apiUrl, {
+          headers: {
+            Authorization: 'Bearer ' + ctx.request.body.accessToken
+          }
+        });
+        if (authResult.data.id == ctx.request.body.id) {
+          let user = {
+            name: authResult.data.formattedName,
+            email: authResult.data.emailAddress,
+            profile_picture: authResult.data.picture.data.pictureUrl,
+            birthday: '',
+            gender: '',
+            profession: authResult.data.position,
+            events: [],
+            created_events: [],
+            accessToken: 'LI' + ctx.request.body.accessToken
+          };
+          user = await this._userDB(user);
+
+          if (user.email) {
+            // console.log('google user', user);
+            ctx.status = 200;
+            ctx.body = JSON.stringify({ user: user });
+            return;
+          }
+        }
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.error('Linkedin validate error', e);
+        ctx.status = 400;
+      }
     }
-    ctx.status = 400;
   }
 
   async getUser (ctx, next) {
