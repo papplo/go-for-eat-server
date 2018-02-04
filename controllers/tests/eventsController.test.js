@@ -89,7 +89,7 @@ let emptyLocationCtx = {
     query: {
       lat: '',
       lng: '',
-      dist:''
+      dist: ''
     },
     body: {
       place_id: 'aasdf',
@@ -117,7 +117,7 @@ let wrongTypeLocationCtx = {
     query: {
       lat: '1fwwe3',
       lng: '4gtg',
-      dist:''
+      dist: ''
     },
     body: {
       place_id: 'aasdf',
@@ -130,7 +130,6 @@ let wrongTypeLocationCtx = {
     }
   }
 };
-
 
 const next = () => {};
 const createdEvent = {
@@ -148,20 +147,23 @@ const mockEventsMongoInstance = {
 const mockMonkInstance = {
   id: mockMongoDb(() => createdEvent)
 };
-const eventController = new EventsController(mockEventsMongoInstance, mockMonkInstance);
+const eventController = new EventsController(
+  mockEventsMongoInstance,
+  mockMonkInstance
+);
 
 describe('Test correct response on events functions calls', () => {
-  
   test('Return 201 on create event', async () => {
     ctx.method = 'POST';
     await eventController.createEvent(ctx, next);
-    expect(ctx.body).toEqual(JSON.stringify({
-      'event': createdEvent
-    }));
+    expect(ctx.body).toEqual(
+      JSON.stringify({
+        event: createdEvent
+      })
+    );
     expect(ctx.status).toEqual(201);
-
   });
-  
+
   test('Return 400 on createEvent with empty fields', async () => {
     emptyDataCtx.method = 'POST';
     await eventController.createEvent(emptyDataCtx, next);
@@ -192,12 +194,11 @@ describe('Test correct response on events functions calls', () => {
     expect(emptyLocationCtx.status).toEqual(400);
   });
 
-
   test('Return 204 on deleting an event', async () => {
     ctx.method = 'DELETE';
     await eventController.deleteEvent(ctx, next);
     expect(ctx.status).toEqual(204);
-  });  
+  });
 
   test('Return 200 on getting infos of an event', async () => {
     ctx.method = 'GET';
@@ -214,9 +215,11 @@ describe('Test correct response on events functions calls', () => {
   test('Return 200 on leaving an event', async () => {
     ctx.method = 'DELETE';
     await eventController.leaveEvent(ctx, next);
-    expect(ctx.body).toEqual(JSON.stringify({
-      'event': createdEvent
-    }));
+    expect(ctx.body).toEqual(
+      JSON.stringify({
+        event: createdEvent
+      })
+    );
     expect(ctx.status).toEqual(200);
   });
 
@@ -226,9 +229,7 @@ describe('Test correct response on events functions calls', () => {
     expect(ctx.body).toEqual(JSON.stringify(createdEvent));
     expect(ctx.status).toEqual(200);
   });
-
 });
-
 
 // Testing stuff - when Id has no matches on the database
 
@@ -246,12 +247,12 @@ const mockEmptyMongoInstance = {
   aggregate: mockMongoDb(() => createdEvent)
 };
 
-
-const eventControllerNoMatches = new EventsController(mockEmptyMongoInstance, mockMonkInstance);
-
+const eventControllerNoMatches = new EventsController(
+  mockEmptyMongoInstance,
+  mockMonkInstance
+);
 
 describe('Test on event not found or wrong ID', () => {
-
   test('editEvent returns error 400 if query has no matches', async () => {
     ctx.method = 'PUT';
     await eventControllerNoMatches.editEvent(ctx, next);
@@ -275,9 +276,7 @@ describe('Test on event not found or wrong ID', () => {
     await eventControllerNoMatches.joinEvent(ctx, next);
     expect(ctx.status).toEqual(400);
   });
-
 });
-
 
 // TODO: verify query params if they from and to are empty, what params do i get?
 describe('Test getEvents on wrong url params', () => {
@@ -301,9 +300,7 @@ describe('Test getEvents on wrong url params', () => {
     await eventControllerNoMatches.editEvent(wrongTypeLocationCtx, next);
     expect(wrongTypeLocationCtx.status).toEqual(400);
   });
-
 });
 
-
-// + check all aspect of modify event 
+// + check all aspect of modify event
 // come posso vedere se la funzione mock database vede i dati esatti?
