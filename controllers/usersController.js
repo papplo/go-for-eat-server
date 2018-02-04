@@ -199,7 +199,7 @@ class UsersController {
             }
           ]);
 
-          user.created_events = await Events.aggregate([
+          user.created_events = await this.Events.aggregate([
             { $match: { creator: this.monk.id(user._id) } },
             {
               $lookup: {
@@ -285,7 +285,7 @@ class UsersController {
             }
           ]);
 
-          user.created_events = await Events.aggregate([
+          user.created_events = await this.Events.aggregate([
             { $match: { creator: this.monk.id(user._id) } },
             {
               $lookup: {
