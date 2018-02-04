@@ -31,7 +31,7 @@ const authorize = async (ctx, next) => {
 
 const routes = function (app) {
   router
-    .post('/api/v1/auth', usersController.auth)
+    .post('/api/v1/auth', usersController.auth.bind(usersController))
     .get('/api/v1/users/:id', authorize, usersController.getUser.bind(usersController))
     .get('/api/v1/me', authorize, usersController.me.bind(usersController))
     .put('/api/v1/me', authorize, usersController.editUser.bind(usersController))
