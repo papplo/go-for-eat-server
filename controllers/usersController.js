@@ -19,7 +19,7 @@ class UsersController {
         // console.log('new user');
         userData.ratings_number = userData.ratings_average = '0';
         userData.description = userData.profession = '';
-        userData.interests = [];
+        userData.interests = '';
         return await this.Users.insert(userData);
       } catch (e) {
         // eslint-disable-next-line no-console
@@ -366,9 +366,9 @@ class UsersController {
     try {
       if (
         ctx.request.body.edit.interests &&
-        ctx.request.body.edit.interests.length >= 4
+        ctx.request.body.edit.interests.length >= 140
       ) {
-        ctx.request.body.edit.interests.splice(4);
+        ctx.request.body.edit.interests.substring(0, 139);
       }
       if (
         ctx.request.body.edit.description &&
