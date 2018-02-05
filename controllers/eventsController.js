@@ -18,7 +18,9 @@ class EventsController {
       place_name: ctx.request.body.place_name,
       place_address: ctx.request.body.place_address,
       location: ctx.request.body.location,
-      place_url: ctx.request.body.place_url,
+      place_url: ctx.request.body.place_url
+        ? ctx.request.body.place_url
+        : 'Not given',
       when: ctx.request.body.when,
       creator: ctx.user._id,
       attendees: [ctx.user._id]

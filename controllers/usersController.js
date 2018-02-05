@@ -161,7 +161,7 @@ class UsersController {
             }
           });
 
-          console.log(data.birthdays);
+          // console.log(data.birthdays);
           const birthday = data.birthdays[1]
             ? `${data.birthdays[1].date.month}/${data.birthdays[1].date.day}/${
               data.birthdays[1].date.year
