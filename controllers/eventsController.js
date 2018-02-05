@@ -258,5 +258,3 @@ class EventsController {
 }
 
 module.exports = EventsController;
-
-// 'attendees.ratings_average': 0,
