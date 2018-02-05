@@ -5,10 +5,9 @@
 
 # Backend source files for Go 4 Eat App
 
-<div align="center">
-This backend supports Google and Facebook `OAuth2.0` authentication and provides DB for users and events
-created by the app.
-</div>
+This backend supports server side Google and Facebook `OAuth2.0` authentication and provides DB for users and events.
+Also serves Linkedin login web service.
+created through [Go 4 Eat app](https://github.com/redspanner/go-for-eat-client).
 
 # USE
 
@@ -33,6 +32,8 @@ FACEBOOK_CLIENTSECRET=<Facebook client app secret>
 GOOGLE_CONSUMERKEY=<Goggle app consumer key>
 GOOGLE_CONSUMERSECRET=<Google app consumer secret>
 ```
+
+You''ll find an example .env file in root folder.
 
 </div>
 
@@ -63,9 +64,9 @@ Follows the [MVC](https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93contr
 
 ## External resources
 
-| Mlab                           |            Travis-CI             |
-| ------------------------------ | :------------------------------: |
-| Remote MongoDb instance        |    Continous Deployment Tool     |
-| [travis-ci.org](travis-ci.org) | [mlab.com](https://www.mlab.com) |
+| **Mlab**                         |         **Travis-CI**          |
+| -------------------------------- | :----------------------------: |
+| Remote MongoDb instance          |   Continous Deployment Tool    |
+| [mlab.com](https://www.mlab.com) | [travis-ci.org](travis-ci.org) |
 
 |[![node](https://img.shields.io/node/v/passport.svg?style=flat-square)]()
