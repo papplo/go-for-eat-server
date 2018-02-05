@@ -69,6 +69,7 @@ class EventsController {
             place_name: ctx.request.body.place_name,
             place_address: ctx.request.body.place_address,
             location: ctx.request.body.location,
+            place_url: ctx.request.body.place_url,
             when: ctx.request.body.when
           }
         }
