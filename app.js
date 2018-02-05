@@ -27,9 +27,9 @@ app
       case 401:
         ctx.app.emit('error', err, this);
         break;
-      case 400:
-        ctx.app.emit('Resource error', err, this);
-        break;
+        // case 400:
+        //   ctx.app.emit('Resource error', err, this);
+        //   break;
       case 404:
         ctx.app.emit('Resource not found', err, this);
         break;

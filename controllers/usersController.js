@@ -376,7 +376,7 @@ class UsersController {
       }
       if (
         ctx.request.body.edit.description &&
-        ctx.request.body.edit.description.length >= 4
+        ctx.request.body.edit.description.length >= 140
       ) {
         ctx.request.body.edit.description = ctx.request.body.edit.description.substring(
           0,
@@ -385,7 +385,7 @@ class UsersController {
       }
       if (
         ctx.request.body.edit.profession &&
-        ctx.request.body.edit.profession.length >= 4
+        ctx.request.body.edit.profession.length >= 140
       ) {
         ctx.request.body.edit.profession = ctx.request.body.edit.profession.substring(
           0,
@@ -400,7 +400,7 @@ class UsersController {
       ctx.status = 204;
     } catch (e) {
       // eslint-disable-next-line no-console
-      console.error('Edit user error', e);
+      // console.error('Edit user error', e);
       ctx.status = 404;
     }
   }
