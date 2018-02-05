@@ -11,7 +11,9 @@ const app = (module.exports = new koa());
 const routes = require('./router.js');
 const db = monk(process.env.MONGOLAB_URI);
 const User = db.get('users');
-Raven.config().install();
+const Raven = require('raven');
+
+Raven.config(process.env.RAVEN_URI).install();
 
 // Logger
 app
