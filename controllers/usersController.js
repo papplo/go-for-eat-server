@@ -140,6 +140,7 @@ class UsersController {
       } catch (e) {
         // eslint-disable-next-line no-console
         console.error('Facebook validate error', e);
+        ctx.status = 400;
       }
     } else if (ctx.request.body.network == 'google') {
       // console.log('google ctx.request.body', ctx.request.body);
@@ -159,9 +160,9 @@ class UsersController {
               Authorization: `Bearer ${ctx.request.body.accessToken}`
             }
           });
-          const birthday = `${data.birthdays[1].date.month}\\${
+          const birthday = `${data.birthdays[1].date.month}/${
             data.birthdays[1].date.day
-          }\\${data.birthdays[1].date.year}`;
+          }/${data.birthdays[1].date.year}`;
           let user = {
             name: authResult.data.given_name,
             email: authResult.data.email,
@@ -236,6 +237,7 @@ class UsersController {
       } catch (e) {
         // eslint-disable-next-line no-console
         console.error('Google validate error', e);
+        ctx.status = 400;
       }
     } else if (ctx.request.body.network == 'linkedin') {
       // console.log('linkedin ctx.request.body', ctx.request.body);
