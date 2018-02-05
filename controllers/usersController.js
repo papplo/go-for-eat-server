@@ -140,6 +140,7 @@ class UsersController {
       } catch (e) {
         // eslint-disable-next-line no-console
         console.error('Facebook validate error', e);
+        ctx.status = 400;
       }
     } else if (ctx.request.body.network == 'google') {
       // console.log('google ctx.request.body', ctx.request.body);
@@ -236,6 +237,7 @@ class UsersController {
       } catch (e) {
         // eslint-disable-next-line no-console
         console.error('Google validate error', e);
+        ctx.status = 400;
       }
     } else if (ctx.request.body.network == 'linkedin') {
       // console.log('linkedin ctx.request.body', ctx.request.body);
