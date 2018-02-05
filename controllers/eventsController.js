@@ -206,7 +206,7 @@ class EventsController {
         : Date.now();
       const to = Number(ctx.request.query.to)
         ? Number(ctx.request.query.to)
-        : Date.now() + 3600 * 24 * 7;
+        : Date.now() + 3600 * 24 * 7 * 1000;
       const events = await this.Events.aggregate([
         {
           $geoNear: {
