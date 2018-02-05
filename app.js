@@ -1,10 +1,11 @@
 'use strict';
 require('dotenv').config();
-const compress = require('koa-compress');
-const logger = require('koa-logger');
 const koa = require('koa');
-const bodyParser = require('koa-bodyparser');
+const helmet = require('koa-helmet');
+const logger = require('koa-logger');
 const cors = require('kcors');
+const bodyParser = require('koa-bodyparser');
+const compress = require('koa-compress');
 const monk = require('monk');
 const app = (module.exports = new koa());
 const routes = require('./router.js');
@@ -14,6 +15,7 @@ const User = db.get('users');
 // Logger
 app
   .use(logger())
+  .use(helmet())
   .use(cors())
   .use(bodyParser())
   .use(async (ctx, next) => {
