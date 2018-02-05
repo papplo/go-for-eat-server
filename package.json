@@ -27,7 +27,8 @@
     "supertest": "^3.0.0"
   },
   "scripts": {
-    "start": "node server.js"
+    "start": "nodemon server.js",
+    "test": "jest"
   },
   "repository": {
     "type": "git",

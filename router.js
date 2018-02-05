@@ -1,11 +1,24 @@
 'use strict';
-
-const usersController = require('./controllers/usersController');
-const eventsController = require('./controllers/eventsController');
-const ratingController = require('./controllers/ratingController');
-const restaurntsController = require('./controllers/restaurntsController');
-
 const router = require('koa-router')();
+
+const UsersController = require('./controllers/usersController');
+const EventsController = require('./controllers/eventsController');
+const ratingsController = require('./controllers/ratingsController');
+
+// MongoDb configure
+const monk = require('monk');
+const db = monk(process.env.MONGOLAB_URI);
+
+// Creating Db instances
+const Events = db.get('events');
+const Users = db.get('users');
+
+// Geo Indexing for MongoDb 
+Events.createIndex( { location : '2dsphere' } );
+
+const eventsController = new EventsController(Events, monk);
+const usersController = new UsersController(Users, Events, monk);
+
 
 const authorize = async (ctx, next) => {
   if (!ctx.user) {
@@ -18,19 +31,19 @@ const authorize = async (ctx, next) => {
 
 const routes = function (app) {
   router
-    .post('/api/v1/auth', usersController.auth)
-    .get('/api/v1/user/:id', authorize, usersController.getUser)
-    .put('/api/v1/user/:id', authorize, usersController.rating)
-    .get('/api/v1/me', authorize, usersController.me)
-    .put('/api/v1/me', authorize, usersController.edit)
+    .post('/api/v1/auth', usersController.auth.bind(usersController))
+    .get('/api/v1/users/:id', authorize, usersController.getUser.bind(usersController))
+    .get('/api/v1/me', authorize, usersController.me.bind(usersController))
+    .put('/api/v1/me', authorize, usersController.editUser.bind(usersController))
+    .put('/api/v1/users/:id', authorize, ratingsController.rating.bind(usersController))
 
-    .post('/api/v1/event', authorize, eventsController.createEvent)
-    .put('/api/v1/event/:id', authorize, eventsController.editEvent)
-    .delete('/api/v1/event/:id', authorize, eventsController.deleteEvent)
-    .get('/api/v1/event/:id', authorize, eventsController.getEvent)
-    .post('/api/v1/event/:id/join', authorize, eventsController.joinEvent)
-    .post('/api/v1/event/:id/leave', authorize, eventsController.leaveEvent)
-    .get('/api/v1/events/:latlng/:from/:to', authorize, eventsController.getEvents)
+    .post('/api/v1/events', authorize, eventsController.createEvent.bind(eventsController))
+    .put('/api/v1/events/:id', authorize, eventsController.editEvent.bind(eventsController))
+    .delete('/api/v1/events/:id', authorize, eventsController.deleteEvent.bind(eventsController))
+    .get('/api/v1/events/:id', authorize, eventsController.getEvent.bind(eventsController))
+    .put('/api/v1/events/:id/users', authorize, eventsController.joinEvent.bind(eventsController))
+    .delete('/api/v1/events/:id/users', authorize, eventsController.leaveEvent.bind(eventsController))
+    .get('/api/v1/events', authorize, eventsController.getEvents.bind(eventsController))
 
     .options('/', options)
     .trace('/', trace)

@@ -1,143 +1,403 @@
 'use strict';
-const monk = require('monk');
 const axios = require('axios');
-const db = monk('localhost/wallto_db');
 const config = require('../config.js');
 const filterProps = require('../services/utils').filterProps;
 
-const User = db.get('users');
+class UsersController {
+  constructor (Users, Events, monk) {
+    this.Users = Users;
+    this.Events = Events;
+    this.monk = monk;
+  }
 
-const userDB = async (userData) => {
-  // console.log('userDB:', userData);
-  let user = await User.findOne({email: userData.email});
-  // console.log('findOne:', user);
-  if (!user) {
+  async _userDB (userData) {
+    // console.log('_userDB:', userData);
+    const user = await this.Users.findOne({ email: userData.email });
+    // console.log('findOne:', user);
+    if (!user) {
+      try {
+        // console.log('new user');
+        userData.ratings_number = userData.ratings_average = '0';
+        userData.description = userData.profession = '';
+        userData.interests = [];
+        return await this.Users.insert(userData);
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.error('this.Users.insert', e);
+      }
+    } else {
+      try {
+        await this.Users.update(
+          { email: userData.email },
+          {
+            $set: {
+              name: userData.name,
+              email: userData.email,
+              profile_picture: userData.profile_picture,
+              birthday: userData.birthday,
+              gender: userData.gender,
+              accessToken: userData.accessToken
+            }
+          }
+        );
+        // console.log('update user');
+        return await this.Users.findOne({ email: userData.email });
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.error('Update user error', e);
+      }
+    }
+  }
+
+  async auth (ctx, next) {
+    if ('POST' != ctx.method) return await next();
+    // console.log('auth', ctx.request.body);
+    if (ctx.request.body.network == 'facebook') {
+      try {
+        const authResult = await axios.get(
+          config.facebook.validateUrl + config.facebook.fields,
+          {
+            headers: {
+              Authorization: 'Bearer ' + ctx.request.body.accessToken
+            }
+          }
+        );
+        // console.log('authResult', authResult);
+        if (authResult.data.id == ctx.request.body.id) {
+          let user = {
+            name: authResult.data.first_name,
+            email: authResult.data.email,
+            profile_picture: authResult.data.picture.data.url,
+            birthday: authResult.data.birthday,
+            gender: authResult.data.gender,
+            events: [],
+            created_events: [],
+            accessToken: 'FB' + ctx.request.body.accessToken
+          };
+          user = await this._userDB(user);
+          // console.log('request.body', ctx.request.body)
+          user.events = await this.Events.aggregate([
+            { $match: { attendees: this.monk.id(user._id) } },
+            {
+              $lookup: {
+                from: 'users',
+                localField: 'attendees',
+                foreignField: '_id',
+                as: 'attendees'
+              }
+            },
+            {
+              $project: {
+                'attendees.email': 0,
+                'attendees.birthday': 0,
+                'attendees.gender': 0,
+                'attendees.events': 0,
+                'attendees.created_events': 0,
+                'attendees.accessToken': 0,
+                'attendees.ratings_average': 0,
+                'attendees.ratings_number': 0,
+                'attendees.profession': 0,
+                'attendees.description': 0,
+                'attendees.interests': 0
+              }
+            }
+          ]);
+
+          user.created_events = await this.Events.aggregate([
+            { $match: { creator: this.monk.id(user._id) } },
+            {
+              $lookup: {
+                from: 'users',
+                localField: 'attendees',
+                foreignField: '_id',
+                as: 'attendees'
+              }
+            },
+            {
+              $project: {
+                'attendees.email': 0,
+                'attendees.birthday': 0,
+                'attendees.gender': 0,
+                'attendees.events': 0,
+                'attendees.created_events': 0,
+                'attendees.accessToken': 0,
+                'attendees.ratings_average': 0,
+                'attendees.ratings_number': 0,
+                'attendees.profession': 0,
+                'attendees.description': 0,
+                'attendees.interests': 0
+              }
+            }
+          ]);
+          // console.log('events', events)
+          // console.log('user', user);
+          if (user.email) {
+            ctx.status = 200;
+            ctx.body = JSON.stringify({ user: user });
+            return;
+          }
+        }
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.error('Facebook validate error', e);
+      }
+    } else if (ctx.request.body.network == 'google') {
+      // console.log('google ctx.request.body', ctx.request.body);
+      try {
+        const authResult = await axios.get(
+          config.google.validateUrl + ctx.request.body.idToken,
+          {
+            headers: {
+              Authorization: 'Bearer ' + ctx.request.body.accessToken
+            }
+          }
+        );
+        // console.log('authResult', authResult.data);
+        if (authResult.data.sub == ctx.request.body.id) {
+          const { data } = await axios.get(config.google.birthdayRequest, {
+            headers: {
+              Authorization: `Bearer ${ctx.request.body.accessToken}`
+            }
+          });
+          const birthday = `${data.birthdays[1].date.month}\\${
+            data.birthdays[1].date.day
+          }\\${data.birthdays[1].date.year}`;
+          let user = {
+            name: authResult.data.given_name,
+            email: authResult.data.email,
+            profile_picture: authResult.data.picture,
+            birthday: birthday,
+            gender: authResult.data.gender,
+            accessToken: 'GO' + ctx.request.body.accessToken
+          };
+          // console.log('user', user);
+          user = await this._userDB(user);
+          user.events = await this.Events.aggregate([
+            { $match: { attendees: this.monk.id(user._id) } },
+            {
+              $lookup: {
+                from: 'users',
+                localField: 'attendees',
+                foreignField: '_id',
+                as: 'attendees'
+              }
+            },
+            {
+              $project: {
+                'attendees.email': 0,
+                'attendees.birthday': 0,
+                'attendees.gender': 0,
+                'attendees.events': 0,
+                'attendees.created_events': 0,
+                'attendees.accessToken': 0,
+                'attendees.ratings_average': 0,
+                'attendees.ratings_number': 0,
+                'attendees.profession': 0,
+                'attendees.description': 0,
+                'attendees.interests': 0
+              }
+            }
+          ]);
+
+          user.created_events = await this.Events.aggregate([
+            { $match: { creator: this.monk.id(user._id) } },
+            {
+              $lookup: {
+                from: 'users',
+                localField: 'attendees',
+                foreignField: '_id',
+                as: 'attendees'
+              }
+            },
+            {
+              $project: {
+                'attendees.email': 0,
+                'attendees.birthday': 0,
+                'attendees.gender': 0,
+                'attendees.events': 0,
+                'attendees.created_events': 0,
+                'attendees.accessToken': 0,
+                'attendees.ratings_average': 0,
+                'attendees.ratings_number': 0,
+                'attendees.profession': 0,
+                'attendees.description': 0,
+                'attendees.interests': 0
+              }
+            }
+          ]);
+
+          if (user.email) {
+            // console.log('google user', user);
+            ctx.status = 200;
+            ctx.body = JSON.stringify({ user: user });
+            return;
+          }
+        }
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.error('Google validate error', e);
+      }
+    } else if (ctx.request.body.network == 'linkedin') {
+      // console.log('linkedin ctx.request.body', ctx.request.body);
+      try {
+        const authResult = await axios.get(config.linkedin.apiUrl, {
+          headers: {
+            Authorization: 'Bearer ' + ctx.request.body.accessToken
+          }
+        });
+        if (authResult.data.id == ctx.request.body.id) {
+          let user = {
+            name: authResult.data.formattedName,
+            email: authResult.data.emailAddress,
+            profile_picture: authResult.data.picture.data.pictureUrl,
+            birthday: '',
+            gender: '',
+            profession: authResult.data.position,
+            events: [],
+            created_events: [],
+            accessToken: 'LI' + ctx.request.body.accessToken
+          };
+          user = await this._userDB(user);
+          user.events = await this.Events.aggregate([
+            { $match: { attendees: this.monk.id(user._id) } },
+            {
+              $lookup: {
+                from: 'users',
+                localField: 'attendees',
+                foreignField: '_id',
+                as: 'attendees'
+              }
+            },
+            {
+              $project: {
+                'attendees.email': 0,
+                'attendees.birthday': 0,
+                'attendees.gender': 0,
+                'attendees.events': 0,
+                'attendees.created_events': 0,
+                'attendees.accessToken': 0,
+                'attendees.ratings_average': 0,
+                'attendees.ratings_number': 0,
+                'attendees.profession': 0,
+                'attendees.description': 0,
+                'attendees.interests': 0
+              }
+            }
+          ]);
+
+          user.created_events = await this.Events.aggregate([
+            { $match: { creator: this.monk.id(user._id) } },
+            {
+              $lookup: {
+                from: 'users',
+                localField: 'attendees',
+                foreignField: '_id',
+                as: 'attendees'
+              }
+            },
+            {
+              $project: {
+                'attendees.email': 0,
+                'attendees.birthday': 0,
+                'attendees.gender': 0,
+                'attendees.events': 0,
+                'attendees.created_events': 0,
+                'attendees.accessToken': 0,
+                'attendees.ratings_average': 0,
+                'attendees.ratings_number': 0,
+                'attendees.profession': 0,
+                'attendees.description': 0,
+                'attendees.interests': 0
+              }
+            }
+          ]);
+
+          if (user.email) {
+            // console.log('google user', user);
+            ctx.status = 200;
+            ctx.body = JSON.stringify({ user: user });
+            return;
+          }
+        }
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.error('Linkedin validate error', e);
+        ctx.status = 400;
+      }
+    }
+  }
+
+  async getUser (ctx, next) {
+    if ('GET' != ctx.method) return await next();
     try {
-      // console.log('new user');
-      return User.insert(userData);
-    } catch (e) { console.error('User.insert', e); }
-  } else {
+      let user = await this.Users.findOne({ _id: ctx.params.id });
+      if (!user) throw `User ${ctx.params.id} not found in Db`;
+      user = filterProps(user, [
+        '_id',
+        'name',
+        'profile_picture',
+        'gender',
+        'birthday',
+        'ratings_number',
+        'ratings_average',
+        'interests',
+        'description',
+        'profession'
+      ]);
+      ctx.status = 200;
+      ctx.body = user;
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error('Get user error', e);
+      cts.status = 404;
+    }
+  }
+
+  async me (ctx, next) {
+    if ('GET' != ctx.method) return await next();
+    ctx.status = 200;
+    ctx.body = ctx.user;
+  }
+
+  async editUser (ctx, next) {
+    if ('PUT' != ctx.method) return await next();
     try {
-      await User.update({email: userData.email}, {
-        'name': userData.name, 
-        'email': userData.email, 
-        'accessToken': userData.accessToken, 
-        'profile_picture': userData.profile_picture
-      });
-      // console.log('update user');
-      return User.findOne({email: userData.email});
-    } catch(e) { console.error('Update user error', e); }
+      if (
+        ctx.request.body.edit.interests &&
+        ctx.request.body.edit.interests.length >= 4
+      ) {
+        ctx.request.body.edit.interests.splice(4);
+      }
+      if (
+        ctx.request.body.edit.description &&
+        ctx.request.body.edit.description.length >= 4
+      ) {
+        ctx.request.body.edit.description = ctx.request.body.edit.description.substring(
+          0,
+          139
+        );
+      }
+      if (
+        ctx.request.body.edit.profession &&
+        ctx.request.body.edit.profession.length >= 4
+      ) {
+        ctx.request.body.edit.profession = ctx.request.body.edit.profession.substring(
+          0,
+          140
+        );
+      }
+      const user = await this.Users.update(
+        { _id: ctx.user._id },
+        ctx.request.body.edit
+      );
+      if (user.nMatched === 0) throw `User ${ctx.params.id} not found in Db`;
+      ctx.status = 204;
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error('Edit user error', e);
+      ctx.status = 404;
+    }
   }
 }
 
-module.exports.auth = async (ctx, next) => {
-  if ('POST' != ctx.method) return await next();
-  if (ctx.request.body.network == 'facebook') {
-    try {
-      let authResult = await axios.get(config.facebook.validateUrl+config.facebook.fields, {
-        headers: {
-          'Authorization': 'Bearer ' + ctx.request.body.accessToken,
-        }
-      });
-      console.log('authResult', authResult);
-      if (authResult.id == ctx.request.body.id) {
-        let user = {
-          'name': authResult.name,
-          'email': authResult.email,
-          'profile_picture': authResult.picture.data.url,
-          'birthday':authResult.birthday,
-          'gender': authResult.gender,
-          'accessToken': 'FB' + ctx.request.body.accessToken,
-        };
-        user = await userDB(user);
-        console.log('user', user);
-        if (user.email) {
-          ctx.status = 200;
-          ctx.body = JSON.stringify({'user': user});
-          return;
-        }
-      }
-    } catch(e) { console.error('Facebook validate error'); }
-  } else if (ctx.request.body.network == 'google') {
-    // console.log('google ctx.request.body', ctx.request.body);
-    try {
-      let authResult = await axios.get(config.google.validateUrl + ctx.request.body.idToken, {
-        headers: {
-          'Authorization': 'Bearer ' + ctx.request.body.accessToken,
-        }
-      });
-      console.log('authResult', authResult.data);
-      if (authResult.data.sub == ctx.request.body.id) {
-        let user = {
-          'name': authResult.data.name,
-          'email': authResult.data.email,
-          'profile_picture': authResult.data.picture,
-          'birthday':authResult.data.birthday,
-          'gender': authResult.data.gender,
-          'accessToken': 'GO' + ctx.request.body.accessToken,
-        };
-        user = await userDB(user);
-        console.log('user', user);
-        if (user.email) {
-          ctx.status = 200;
-          ctx.body = JSON.stringify({'user': user});
-          return;
-        }
-      }
-    } catch(e) { console.error('Google validate error'); }
-  } if (ctx.request.body.network == 'linkedin') {
-    console.log('linkedin ctx.request.body', ctx.request.body);
-  }
-  ctx.status = 404;
-};
-
-module.exports.getUser = async (ctx, next) => {
-  if ('GET' != ctx.method) return await next();
-  try {
-    user = await User.findOne({_id: ctx.params.id});
-    user = filterProps(user, ['_id', 'name', 'profile_picture', 'gender', 'age']);
-  } catch(e) { console.error('Get user error', e); }
-  ctx.status = 200;
-  ctx.body = user;
-};
-
-module.exports.rating = async (ctx, next) => {
-  if ('PUT' != ctx.method) return await next();
-  let rating = ctx.request.body.rating;
-  let user_to_rate = ctx.params.id;
-  try {
-    await User.update({_id: user_to_rate},
-      {
-        'rating': {
-          'user_id': userData.email, 
-          'value': userData.accessToken, 
-          'profile_picture': userData.profile_picture
-        },
-        
-      });
-  } catch(e) { console.error('Rating user error', e); }
-  ctx.status = 200;
-  ctx.body = promise;
-};
-
-module.exports.me = async (ctx, next) => {
-  if ('GET' != ctx.method) return await next();
-  ctx.status = 200;
-  ctx.body = ctx.user;
-};
-
-module.exports.edit = async (ctx, next) => {
-  if ('PUT' != ctx.method) return await next();
-  try {
-    await User.update({_id: ctx.user._id}, ctx.request.body.edit);
-    // the recived object should be like this:
-    // ctx.request.body.edit =
-    // {
-    //   'preferences': [tennis , video games, food],
-    //   'description': 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.'
-    // }
-    return User.findOne({_id: ctx.user._id});
-  } catch(e) { console.error('Edit user error', e); }
-  ctx.status = 200;
-  ctx.body = ctx.user;
-};
+module.exports = UsersController;

@@ -1,13 +1,20 @@
 module.exports = {
   facebook: {
-    clientId: '442248476177832',
-    clientSecret: '28c758a77d1b3d6cf88f9a53fe55d8f1',
+    clientId: process.env.FACEBOOK_CLIENTID,
+    clientSecret: process.env.FACEBOOK_CLIENTSECRET,
     validateUrl: 'https://graph.facebook.com/me',
-    fields: '?fields=id,name,email,picture,birthday,gender'
+    fields:
+      '?fields=id,first_name,email,picture.width(500).height(500),birthday,gender'
   },
   google: {
-    consumerKey: '113358382259-c09bq5uevjc8rtrm79lg5scpbo84h1le.apps.googleusercontent.com',
-    consumerSecret: 'yV2ZiOQ7G8wYFy8qaugAab2i',
-    validateUrl: 'https://www.googleapis.com/oauth2/v3/tokeninfo?id_token='
+    consumerKey: process.env.GOOGLE_CONSUMERKEY,
+    consumerSecret: process.env.GOOGLE_CONSUMERSECRET,
+    validateUrl: 'https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=',
+    birthdayRequest:
+      'https://people.googleapis.com/v1/people/me?personFields=birthdays'
+  },
+  linkedin: {
+    apiUrl:
+      'https://api.linkedin.com/v1/people/~:(id,formatted-name,num-connections,picture-url,email-address)?format=json'
   }
-}
+};
