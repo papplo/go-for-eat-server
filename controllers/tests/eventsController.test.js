@@ -10,36 +10,12 @@ const {
 
 const mockMongoDb = jest.fn;
 
-// from test ////////////////////////////////////////////
-
-// const createdEvent = {}
-// const eventController = new EventsController({
-//   insert: jest.fn().returnValue(() => createdEvent)
-// })
-
-// ctx = {};
-// eventController.createEvent(ctx, next);
-// ctx.body.toEqual(JSON.stringify({
-//   'event': createdEvent
-// }))
-// ctx.status.toEqual(201);
-
-/////////////////////////////////////////////////////////
 
 const next = () => {};
 const createdEvent = {
   attendees: ['42']
 };
 
-// const WriteResultEmpty = {
-//   nMatched: 0
-// };
-
-// const WriteResultOk = {
-//   nMatched: 1
-// };
-
-// const nullResult = null;
 
 const mockEventsMongoInstance = {
   insert: mockMongoDb(() => createdEvent),
@@ -49,13 +25,6 @@ const mockEventsMongoInstance = {
   aggregate: mockMongoDb(() => createdEvent)
 };
 
-// const mockEventsMongoEmptyInstance = {
-//   insert: mockMongoDb(() => createdUser),
-//   update: mockMongoDb(() => WriteResultEmpty),
-//   remove: mockMongoDb(() => createdUser),
-//   findOne: mockMongoDb(() => nullResult),
-//   aggregate: mockMongoDb(() => createdUser)
-// };
 
 const mockMonkInstance = {
   id: mockMongoDb(() => createdEvent)
@@ -65,10 +34,6 @@ const eventController = new EventsController(
   mockMonkInstance
 );
 
-// const eventControllerEmpty = new EventsController(
-//   mockEventsMongoEmptyInstance,
-//   mockMonkInstance
-// );
 
 describe('Test correct response on events functions calls', () => {
   test('Return 201 on create event', async () => {
