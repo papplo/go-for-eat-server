@@ -11,6 +11,7 @@ const app = (module.exports = new koa());
 const routes = require('./router.js');
 const db = monk(process.env.MONGOLAB_URI);
 const User = db.get('users');
+Raven.config().install();
 
 // Logger
 app
@@ -56,5 +57,13 @@ routes(app);
 
 // Compress
 app.use(compress());
+
+// Raven
+app.on('error', function (err) {
+  Raven.captureException(err, function (err, eventId) {
+    //eslint-disable-next-line no-console
+    console.log('Reported error ' + eventId);
+  });
+});
 
 module.exports = app;

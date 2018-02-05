@@ -33,6 +33,7 @@ FACEBOOK_CLIENT=<Facebook client app code>
 FACEBOOK_CLIENTSECRET=<Facebook client app secret>
 GOOGLE_CONSUMERKEY=<Goggle app consumer key>
 GOOGLE_CONSUMERSECRET=<Google app consumer secret>
+RAVEN_URI=<Raven logger  dedicate Uri>
 ```
 
 You''ll find an example .env file in root folder.
