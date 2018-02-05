@@ -160,9 +160,13 @@ class UsersController {
               Authorization: `Bearer ${ctx.request.body.accessToken}`
             }
           });
-          const birthday = `${data.birthdays[1].date.month}/${
-            data.birthdays[1].date.day
-          }/${data.birthdays[1].date.year}`;
+
+          console.log(data.birthdays);
+          const birthday = data.birthdays[1]
+            ? `${data.birthdays[1].date.month}/${data.birthdays[1].date.day}/${
+              data.birthdays[1].date.year
+            }`
+            : '';
           let user = {
             name: authResult.data.given_name,
             email: authResult.data.email,
@@ -389,7 +393,7 @@ class UsersController {
         );
       }
       const user = await this.Users.update(
-        { _id: ctx.user._id },
+        { _id: this.monk.id(ctx.user._id) },
         ctx.request.body.edit
       );
       if (user.nMatched === 0) throw `User ${ctx.params.id} not found in Db`;
