@@ -5,6 +5,8 @@
 
 # Backend source files for Go 4 Eat App
 
+[![Build Status](https://travis-ci.org/Glitches/go-for-eat-server.svg?branch=development)](https://travis-ci.org/Glitches/go-for-eat-server)
+
 This backend supports server side Google and Facebook `OAuth2.0` authentication and provides DB for users and events.
 Also serves Linkedin login web service.
 created through [Go 4 Eat app](https://github.com/redspanner/go-for-eat-client).
@@ -68,5 +70,3 @@ Follows the [MVC](https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93contr
 | -------------------------------- | :----------------------------: |
 | Remote MongoDb instance          |   Continous Deployment Tool    |
 | [mlab.com](https://www.mlab.com) | [travis-ci.org](travis-ci.org) |
-
-|[![node](https://img.shields.io/node/v/passport.svg?style=flat-square)]()

@@ -136,7 +136,7 @@ describe('Test correct response on users functions calls', () => {
     await userController.editUser(singleFieldCtx, next);
     expect(
       singleFieldCtx.request.body.edit.interests.length
-    ).toBeLessThanOrEqual(4);
+    ).toBeLessThanOrEqual(140);
     expect(singleFieldCtx.status).toEqual(204);
   });
 
