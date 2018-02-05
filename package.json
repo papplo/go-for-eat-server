@@ -1,6 +1,6 @@
 {
   "name": "go-for-eat-server",
-  "version": "1.0.0",
+  "version": "0.8.0",
   "description": "Go 4 eat server",
   "main": "app.js",
   "dependencies": {

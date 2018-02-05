@@ -1,0 +1,9 @@
+language: node_js
+node_js:
+  - "8.9.4"
+deploy:
+  provider: heroku
+  api_key:
+    secure: 7a19adbb-fd61-4603-b3f2-f9159f603b6d
+  app: thawing-earth-64718
+  on: development
