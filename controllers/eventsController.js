@@ -18,6 +18,9 @@ class EventsController {
       place_name: ctx.request.body.place_name,
       place_address: ctx.request.body.place_address,
       location: ctx.request.body.location,
+      place_url: ctx.request.body.place_url
+        ? ctx.request.body.place_url
+        : 'Not given',
       when: ctx.request.body.when,
       creator: ctx.user._id,
       attendees: [ctx.user._id]
@@ -31,9 +34,9 @@ class EventsController {
         !ctx.request.body.location.coordinates[0]
       )
         throw 'Latitude and or Longitude element not found in coordinates key';
-      if (!regexLat.test(ctx.request.body.location.coordinates[0]))
+      if (!regexLat.test(ctx.request.body.location.coordinates[1]))
         throw 'Not a valid Latitude coordinate input number';
-      if (!regexLng.test(ctx.request.body.location.coordinates[1]))
+      if (!regexLng.test(ctx.request.body.location.coordinates[0]))
         throw 'Not a valid Longitude coordinate input number';
       const event = await this.Events.insert(newEvent);
       ctx.status = 201;
@@ -56,9 +59,9 @@ class EventsController {
         !ctx.request.body.location.coordinates[0]
       )
         throw 'Latitude and or Longitude element not found in coordinates key';
-      if (!regexLat.test(ctx.request.body.location.coordinates[0]))
+      if (!regexLat.test(ctx.request.body.location.coordinates[1]))
         throw 'Not a valid Latitude coordinate input number';
-      if (!regexLng.test(ctx.request.body.location.coordinates[1]))
+      if (!regexLng.test(ctx.request.body.location.coordinates[0]))
         throw 'Not a valid Longitude coordinate input number';
       const updateResult = await this.Events.update(
         { _id: ctx.params.id },
@@ -68,6 +71,7 @@ class EventsController {
             place_name: ctx.request.body.place_name,
             place_address: ctx.request.body.place_address,
             location: ctx.request.body.location,
+            place_url: ctx.request.body.place_url,
             when: ctx.request.body.when
           }
         }
@@ -213,7 +217,7 @@ class EventsController {
       const events = await this.Events.aggregate([
         {
           $geoNear: {
-            near: { type: 'Point', coordinates: [lat, lng] },
+            near: { type: 'Point', coordinates: [lng, lat] },
             distanceField: 'distance',
             maxDistance: distance,
             query: { when: { $gte: from, $lte: to } },
