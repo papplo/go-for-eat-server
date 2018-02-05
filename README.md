@@ -59,6 +59,7 @@ Follows the [MVC](https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93contr
 * **dotenv** - [Loads enviromnet variables from .env for nodejs projects](https://github.com/motdotla/dotenv)
 * **Axios** - [Promise client for node.js](https://github.com/axios/axios)
 * **Koa** - [Web framework for node.js](http://koajs.com/)
+  * **Koa Helmet** - [Important security headers for Koa](https://github.com/venables/koa-helmet)
   * **Kcors** - CORS handler
   * **Koa-bodyparser** - [A body parser for koa, base on co-body.](https://github.com/koajs/bodyparser)
   * **Koa-logger** - [Development style loggin middleware](https://github.com/koajs/logger)
