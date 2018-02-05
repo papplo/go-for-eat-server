@@ -74,7 +74,7 @@ class EventsController {
       ctx.status = 204;
     } catch (e) {
       // eslint-disable-next-line no-console
-      console.error('Modify create error: ', e);
+      // console.error('Modify create error: ', e);
       ctx.status = 500;
     }
   }
