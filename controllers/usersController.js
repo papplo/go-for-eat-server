@@ -394,7 +394,7 @@ class UsersController {
             ? ctx.request.body.edit.profession.substring(0, 139)
             : ctx.request.body.edit.profession;
       }
-      console.log(update);
+      // console.log(update);
       const user = await this.Users.update({ _id: ctx.user._id }, update);
       if (user.nMatched === 0) return (ctx.status = 404); // throw `User ${ctx.params.id} not found in Db`;
       ctx.status = 204;

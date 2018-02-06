@@ -1,6 +1,6 @@
 <h1 align="center">Go 4 Eat Server</h1>
 <div align="center">
-<img src="https://github.com/glitches/go-for-eat-server/blob/feature/documentation/assets/appIcone.png?raw=true">
+<img src="https://github.com/glitches/go-for-eat-server/blob/development/assets/appIcone.png?raw=true">
 </div>
 
 # Backend source files for Go 4 Eat App

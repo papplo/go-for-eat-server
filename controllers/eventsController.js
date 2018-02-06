@@ -254,7 +254,7 @@ class EventsController {
         { $sort: { attendees: -1 } },
         { $sort: { 'attendees.ratings_average': -1 } }
       ]);
-      console.log(events);
+      // console.log(events);
       ctx.status = 200;
       ctx.body = events;
     } catch (e) {
