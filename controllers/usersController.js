@@ -10,6 +10,78 @@ class UsersController {
     this.monk = monk;
   }
 
+  async _fetchCreatedEvents (user, position) {
+    return await this.Events.aggregate([
+      {
+        $geoNear: {
+          near: { type: 'Point', coordinates: [position.lng, position.lat] },
+          distanceField: 'distance',
+          query: { $match: { creator: this.monk.id(user._id) } },
+          spherical: true
+        }
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'attendees',
+          foreignField: '_id',
+          as: 'attendees'
+        }
+      },
+      {
+        $project: {
+          'attendees.email': 0,
+          'attendees.birthday': 0,
+          'attendees.gender': 0,
+          'attendees.events': 0,
+          'attendees.created_events': 0,
+          'attendees.accessToken': 0,
+          'attendees.ratings_average': 0,
+          'attendees.ratings_number': 0,
+          'attendees.profession': 0,
+          'attendees.description': 0,
+          'attendees.interests': 0
+        }
+      }
+    ]);
+  }
+
+  async _fetchAttendedEvents (user, position) {
+    return await this.Events.aggregate([
+      {
+        $geoNear: {
+          near: { type: 'Point', coordinates: [position.lng, position.lat] },
+          distanceField: 'distance',
+          query: { $match: { attendees: this.monk.id(user._id) } },
+          spherical: true
+        }
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'attendees',
+          foreignField: '_id',
+          as: 'attendees'
+        }
+      },
+      {
+        $project: {
+          'attendees.email': 0,
+          'attendees.birthday': 0,
+          'attendees.gender': 0,
+          'attendees.events': 0,
+          'attendees.created_events': 0,
+          'attendees.accessToken': 0,
+          'attendees.ratings_average': 0,
+          'attendees.ratings_number': 0,
+          'attendees.profession': 0,
+          'attendees.description': 0,
+          'attendees.interests': 0
+        }
+      }
+    ]);
+  }
+
   async _userDB (userData) {
     const user = await this.Users.findOne({ email: userData.email });
     if (!user) {
@@ -69,59 +141,14 @@ class UsersController {
             accessToken: `FB${ctx.request.body.accessToken}`
           };
           user = await this._userDB(user);
-          user.events = await this.Events.aggregate([
-            { $match: { attendees: this.monk.id(user._id) } },
-            {
-              $lookup: {
-                from: 'users',
-                localField: 'attendees',
-                foreignField: '_id',
-                as: 'attendees'
-              }
-            },
-            {
-              $project: {
-                'attendees.email': 0,
-                'attendees.birthday': 0,
-                'attendees.gender': 0,
-                'attendees.events': 0,
-                'attendees.created_events': 0,
-                'attendees.accessToken': 0,
-                'attendees.ratings_average': 0,
-                'attendees.ratings_number': 0,
-                'attendees.profession': 0,
-                'attendees.description': 0,
-                'attendees.interests': 0
-              }
-            }
-          ]);
-
-          user.created_events = await this.Events.aggregate([
-            { $match: { creator: this.monk.id(user._id) } },
-            {
-              $lookup: {
-                from: 'users',
-                localField: 'attendees',
-                foreignField: '_id',
-                as: 'attendees'
-              }
-            },
-            {
-              $project: {
-                'attendees.email': 0,
-                'attendees.birthday': 0,
-                'attendees.gender': 0,
-                'attendees.events': 0,
-                'attendees.created_events': 0,
-                'attendees.accessToken': 0,
-                'attendees.ratings_average': 0,
-                'attendees.ratings_number': 0,
-                'attendees.profession': 0,
-                'attendees.description': 0,
-                'attendees.interests': 0
-              }
-            }
-          ]);
+          user.created_events = await _fetchCreatedEvents(
+            user,
+            authResult.data.position
+          );
+          user.events = await _fetchAttendedEvents(
+            user,
+            authResult.data.position
+          );
           if (user.email) {
             ctx.status = 200;
             ctx.body = { user };
@@ -163,60 +190,14 @@ class UsersController {
             accessToken: `GO${ctx.request.body.accessToken}`
           };
           user = await this._userDB(user);
-          user.events = await this.Events.aggregate([
-            { $match: { attendees: this.monk.id(user._id) } },
-            {
-              $lookup: {
-                from: 'users',
-                localField: 'attendees',
-                foreignField: '_id',
-                as: 'attendees'
-              }
-            },
-            {
-              $project: {
-                'attendees.email': 0,
-                'attendees.birthday': 0,
-                'attendees.gender': 0,
-                'attendees.events': 0,
-                'attendees.created_events': 0,
-                'attendees.accessToken': 0,
-                'attendees.ratings_average': 0,
-                'attendees.ratings_number': 0,
-                'attendees.profession': 0,
-                'attendees.description': 0,
-                'attendees.interests': 0
-              }
-            }
-          ]);
-
-          user.created_events = await this.Events.aggregate([
-            { $match: { creator: this.monk.id(user._id) } },
-            {
-              $lookup: {
-                from: 'users',
-                localField: 'attendees',
-                foreignField: '_id',
-                as: 'attendees'
-              }
-            },
-            {
-              $project: {
-                'attendees.email': 0,
-                'attendees.birthday': 0,
-                'attendees.gender': 0,
-                'attendees.events': 0,
-                'attendees.created_events': 0,
-                'attendees.accessToken': 0,
-                'attendees.ratings_average': 0,
-                'attendees.ratings_number': 0,
-                'attendees.profession': 0,
-                'attendees.description': 0,
-                'attendees.interests': 0
-              }
-            }
-          ]);
-
+          user.created_events = await _fetchCreatedEvents(
+            user,
+            authResult.data.position
+          );
+          user.events = await _fetchAttendedEvents(
+            user,
+            authResult.data.position
+          );
           if (user.email) {
             ctx.status = 200;
             ctx.body = { user };
@@ -247,60 +228,14 @@ class UsersController {
             accessToken: `LI${ctx.request.body.accessToken}`
           };
           user = await this._userDB(user);
-          user.events = await this.Events.aggregate([
-            { $match: { attendees: this.monk.id(user._id) } },
-            {
-              $lookup: {
-                from: 'users',
-                localField: 'attendees',
-                foreignField: '_id',
-                as: 'attendees'
-              }
-            },
-            {
-              $project: {
-                'attendees.email': 0,
-                'attendees.birthday': 0,
-                'attendees.gender': 0,
-                'attendees.events': 0,
-                'attendees.created_events': 0,
-                'attendees.accessToken': 0,
-                'attendees.ratings_average': 0,
-                'attendees.ratings_number': 0,
-                'attendees.profession': 0,
-                'attendees.description': 0,
-                'attendees.interests': 0
-              }
-            }
-          ]);
-
-          user.created_events = await this.Events.aggregate([
-            { $match: { creator: this.monk.id(user._id) } },
-            {
-              $lookup: {
-                from: 'users',
-                localField: 'attendees',
-                foreignField: '_id',
-                as: 'attendees'
-              }
-            },
-            {
-              $project: {
-                'attendees.email': 0,
-                'attendees.birthday': 0,
-                'attendees.gender': 0,
-                'attendees.events': 0,
-                'attendees.created_events': 0,
-                'attendees.accessToken': 0,
-                'attendees.ratings_average': 0,
-                'attendees.ratings_number': 0,
-                'attendees.profession': 0,
-                'attendees.description': 0,
-                'attendees.interests': 0
-              }
-            }
-          ]);
-
+          user.created_events = await _fetchCreatedEvents(
+            user,
+            authResult.data.position
+          );
+          user.events = await _fetchAttendedEvents(
+            user,
+            authResult.data.position
+          );
           if (user.email) {
             ctx.status = 200;
             ctx.body = { user };
