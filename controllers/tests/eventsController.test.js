@@ -10,12 +10,10 @@ const {
 
 const mockMongoDb = jest.fn;
 
-
 const next = () => {};
 const createdEvent = {
   attendees: ['42']
 };
-
 
 const mockEventsMongoInstance = {
   insert: mockMongoDb(() => createdEvent),
@@ -25,7 +23,6 @@ const mockEventsMongoInstance = {
   aggregate: mockMongoDb(() => createdEvent)
 };
 
-
 const mockMonkInstance = {
   id: mockMongoDb(() => createdEvent)
 };
@@ -34,16 +31,13 @@ const eventController = new EventsController(
   mockMonkInstance
 );
 
-
 describe('Test correct response on events functions calls', () => {
   test('Return 201 on create event', async () => {
     ctx.method = 'POST';
     await eventController.createEvent(ctx, next);
-    expect(ctx.body).toEqual(
-      JSON.stringify({
-        event: createdEvent
-      })
-    );
+    expect(ctx.body).toEqual({
+      event: createdEvent
+    });
     expect(ctx.status).toEqual(201);
   });
 
@@ -98,18 +92,16 @@ describe('Test correct response on events functions calls', () => {
   test('Return 200 on leaving an event', async () => {
     ctx.method = 'DELETE';
     await eventController.leaveEvent(ctx, next);
-    expect(ctx.body).toEqual(
-      JSON.stringify({
-        event: createdEvent
-      })
-    );
+    expect(ctx.body).toEqual({
+      event: createdEvent
+    });
     expect(ctx.status).toEqual(200);
   });
 
   test('Return 200 on getting all events nearby list', async () => {
     ctx.method = 'GET';
     await eventController.getEvents(ctx, next);
-    expect(ctx.body).toEqual(JSON.stringify(createdEvent));
+    expect(ctx.body).toEqual(createdEvent);
     expect(ctx.status).toEqual(200);
   });
 });

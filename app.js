@@ -64,7 +64,7 @@ app.use(compress());
 app.on('error', function (err) {
   Raven.captureException(err, function (err, eventId) {
     //eslint-disable-next-line no-console
-    console.log('Reported error ' + eventId);
+    console.log(`Reported error ${eventId}`);
   });
 });
 

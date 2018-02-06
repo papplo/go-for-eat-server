@@ -7,22 +7,6 @@ const { singleFieldCtx, tooManyCtx } = require('./mocks/usersContrller.mock');
 
 const mockMongoDb = jest.fn;
 
-// from test ////////////////////////////////////////////
-
-// const createdEvent = {}
-// const eventController = new EventsController({
-//   insert: jest.fn().returnValue(() => createdEvent)
-// })
-
-// ctx = {};
-// eventController.createEvent(ctx, next);
-// ctx.body.toEqual(JSON.stringify({
-//   'event': createdEvent
-// }))
-// ctx.status.toEqual(201);
-
-/////////////////////////////////////////////////////////
-
 const next = () => {};
 const createdUser = {
   interests: ['42'],
@@ -93,7 +77,7 @@ describe('Test correct response on users functions calls', () => {
     expect(singleFieldCtx.status).toEqual(204);
   });
 
-  // test('Return 204 and save 140 charactesr long description only', async () => {
+  // test.only('Return 204 and save 140 charactesr long description only', async () => {
   //   tooManyCtx.method = 'PUT';
   //   await userController.editUser(tooManyCtx, next);
   //   expect(tooManyCtx.request.body.edit.description.length).toBeLessThanOrEqual(
@@ -102,14 +86,14 @@ describe('Test correct response on users functions calls', () => {
   //   expect(tooManyCtx.status).toEqual(204);
   // });
 
-  // test('Return 204 and save 140 charactesr long profession description only', async () => {
-  //   tooManyCtx.method = 'PUT';
-  //   await userController.editUser(tooManyCtx, next);
-  //   expect(tooManyCtx.request.body.edit.profession.length).toBeLessThanOrEqual(
-  //     140
-  //   );
-  //   expect(tooManyCtx.status).toEqual(204);
-  // });
+  test('Return 204 and save 140 charactesr long profession description only', async () => {
+    tooManyCtx.method = 'PUT';
+    await userController.editUser(tooManyCtx, next);
+    expect(tooManyCtx.request.body.edit.profession.length).toBeLessThanOrEqual(
+      140
+    );
+    expect(tooManyCtx.status).toEqual(204);
+  });
 
   test('editEvent returns error 404 if ID has no matches', async () => {
     singleFieldCtx.method = 'PUT';
