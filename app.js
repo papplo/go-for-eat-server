@@ -13,7 +13,7 @@ const db = monk(process.env.MONGOLAB_URI);
 const User = db.get('users');
 const Raven = require('raven');
 
-Raven.config(process.env.RAVEN_URI).install();
+Raven.config(process.env.SENTRY_DSN).install();
 
 // Logger
 app
@@ -64,7 +64,7 @@ app.use(compress());
 app.on('error', function (err) {
   Raven.captureException(err, function (err, eventId) {
     //eslint-disable-next-line no-console
-    console.log('Reported error ' + eventId);
+    console.log(`Reported error ${eventId}`);
   });
 });
 

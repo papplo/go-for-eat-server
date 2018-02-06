@@ -1,6 +1,6 @@
 <h1 align="center">Go 4 Eat Server</h1>
 <div align="center">
-<img src="https://github.com/glitches/go-for-eat-server/blob/feature/documentation/assets/appIcone.png?raw=true">
+<img src="https://github.com/glitches/go-for-eat-server/blob/development/assets/appIcone.png?raw=true">
 </div>
 
 # Backend source files for Go 4 Eat App
@@ -68,8 +68,8 @@ Follows the [MVC](https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93contr
 
 ## External resources
 
-|                                                                      **Mlab**                                                                      |                                                                   **Travis-CI**                                                                   |
-| :------------------------------------------------------------------------------------------------------------------------------------------------: | :-----------------------------------------------------------------------------------------------------------------------------------------------: |
-|                                                              Remote MongoDb instance                                                               |                                                             Continous Deployment Tool                                                             |
-| <img src="https://github.com/glitches/go-for-eat-server/blob/feature/documentation/assets/mLab-logo-onlight.png?raw=true" height="80" width="120"> | <img src="https://github.com/glitches/go-for-eat-server/blob/feature/documentation/assets/TravisCI-Mascot-1.png?raw=true" height="80" width="80"> |
-|                                                          [mlab.com](https://www.mlab.com)                                                          |                                                          [travis-ci.org](travis-ci.org)                                                           |
+|                                                                 **Mlab**                                                                 |                                                              **Travis-CI**                                                              |                                                                **Sentry**                                                                 |
+| :--------------------------------------------------------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------------------------------------------: | :---------------------------------------------------------------------------------------------------------------------------------------: |
+|                                                         Remote MongoDb instance                                                          |                                                        Continous Deployment Tool                                                        |                                                             Exceptions Logger                                                             |
+| <img src="https://github.com/Glitches/go-for-eat-server/blob/development/assets/mLab-logo-onlight.png?raw=true" height="80" width="120"> | <img src="https://github.com/Glitches/go-for-eat-server/blob/development/assets/TravisCI-Mascot-1.png?raw=true" height="80" width="80"> | <img src="https://github.com/Glitches/go-for-eat-server/blob/development/assets/sentry-glyph-black.png?raw=true" height="80" width="120"> |
+|                                                     [mlab.com](https://www.mlab.com)                                                     |                                                     [travis-ci.org](travis-ci.org)                                                      |                                                   [sentry.io](http://sentry.io/welcome)                                                   |
