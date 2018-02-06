@@ -375,34 +375,27 @@ class UsersController {
   async editUser (ctx, next) {
     if ('PUT' != ctx.method) return await next();
     try {
-      if (
-        ctx.request.body.edit.interests &&
-        ctx.request.body.edit.interests.length >= 140
-      ) {
-        ctx.request.body.edit.interests.substring(0, 139);
+      const update = { $set: {} };
+      if (ctx.request.body.edit.interests) {
+        update.$set.interests =
+          ctx.request.body.edit.interests.length >= 140
+            ? ctx.request.body.edit.interests.substring(0, 139)
+            : ctx.request.body.edit.interests;
       }
-      if (
-        ctx.request.body.edit.description &&
-        ctx.request.body.edit.description.length >= 140
-      ) {
-        ctx.request.body.edit.description = ctx.request.body.edit.description.substring(
-          0,
-          139
-        );
+      if (ctx.request.body.edit.description) {
+        update.$set.description =
+          ctx.request.body.edit.description.length >= 140
+            ? ctx.request.body.edit.description.substring(0, 139)
+            : ctx.request.body.edit.description;
       }
-      if (
-        ctx.request.body.edit.profession &&
-        ctx.request.body.edit.profession.length >= 140
-      ) {
-        ctx.request.body.edit.profession = ctx.request.body.edit.profession.substring(
-          0,
-          140
-        );
+      if (ctx.request.body.edit.profession) {
+        update.$set.profession =
+          ctx.request.body.edit.profession.length >= 140
+            ? ctx.request.body.edit.profession.substring(0, 139)
+            : ctx.request.body.edit.profession;
       }
-      const user = await this.Users.update(
-        { _id: ctx.user._id },
-        ctx.request.body.edit
-      );
+      // console.log(update);
+      const user = await this.Users.update({ _id: ctx.user._id }, update);
       if (user.nMatched === 0) return (ctx.status = 404); // throw `User ${ctx.params.id} not found in Db`;
       ctx.status = 204;
     } catch (e) {
