@@ -27,15 +27,19 @@ class EventsController {
       for (const key in newEvent) {
         if (!newEvent[key]) return (ctx.status = 400); //throw `Empty parameter ${[key]}`;
       }
-      if (!ctx.request.body.location.coordinates[1]) return (ctx.status = 400); //throw 'Latitude element not found in coordinates key';
-      if (!ctx.request.body.location.coordinates[0]) return (ctx.status = 400); //throw 'Longitude element not found in coordinates key';
-      if (!regexLat.test(ctx.request.body.location.coordinates[1]))
+      if (
+        !ctx.request.body.location.coordinates[1] ||
+        !ctx.request.body.location.coordinates[0]
+      )
+        return (ctx.status = 400); //throw 'Latitude element not found in coordinates key';
+      if (
+        !regexLat.test(ctx.request.body.location.coordinates[1]) ||
+        !regexLng.test(ctx.request.body.location.coordinates[0])
+      )
         return (ctx.status = 400); //throw 'Not a valid Latitude coordinate input number';
-      if (!regexLng.test(ctx.request.body.location.coordinates[0]))
-        return (ctx.status = 400); //throw 'Not a valid Longitude coordinate input number';
       const event = await this.Events.insert(newEvent);
       ctx.status = 201;
-      ctx.body = JSON.stringify({ event: event });
+      ctx.body = { event };
     } catch (e) {
       // eslint-disable-next-line no-console
       // console.error('Event create error: ', e);
@@ -50,14 +54,16 @@ class EventsController {
       for (const key in ctx.request.body) {
         if (!ctx.request.body[key]) return (ctx.status = 400); //throw `Empty input parameter ${[key]}`;
       }
-      if (!Array.isArray(ctx.request.body.location.coordinates))
+      if (
+        !Array.isArray(ctx.request.body.location.coordinates) ||
+        ctx.request.body.location.coordinates.length != 2
+      )
         return (ctx.status = 400);
-      if (ctx.request.body.location.coordinates.length != 2)
-        return (ctx.status = 400); //throw 'Latitude and or Longitude element not found in coordinates key';
-      if (!regexLat.test(ctx.request.body.location.coordinates[1]))
+      if (
+        !regexLat.test(ctx.request.body.location.coordinates[1]) ||
+        !regexLng.test(ctx.request.body.location.coordinates[0])
+      )
         return (ctx.status = 400); //throw 'Not a valid Latitude coordinate input number';
-      if (!regexLng.test(ctx.request.body.location.coordinates[0]))
-        return (ctx.status = 400); //throw 'Not a valid Longitude coordinate input number';
       const updateResult = await this.Events.update(
         { _id: ctx.params.id },
         {
@@ -181,7 +187,7 @@ class EventsController {
         }
       );
       event = await this.Events.findOne({ _id: ctx.params.id });
-      ctx.body = JSON.stringify({ event: event });
+      ctx.body = { event };
       ctx.status = 200;
     } catch (e) {
       // eslint-disable-next-line no-console
@@ -248,9 +254,9 @@ class EventsController {
         { $sort: { attendees: -1 } },
         { $sort: { 'attendees.ratings_average': -1 } }
       ]);
-      // console.log(events[1]);
+      console.log(events);
       ctx.status = 200;
-      ctx.body = JSON.stringify(events);
+      ctx.body = events;
     } catch (e) {
       // eslint-disable-next-line no-console
       // console.error(`getEvents error ${e}`);
