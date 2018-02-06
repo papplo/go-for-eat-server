@@ -39,6 +39,7 @@ class EventsController {
     } catch (e) {
       // eslint-disable-next-line no-console
       // console.error('Event create error: ', e);
+      Raven.captureException(e);
       ctx.status = 500;
     }
   }
@@ -75,6 +76,7 @@ class EventsController {
     } catch (e) {
       // eslint-disable-next-line no-console
       // console.error('Modify create error: ', e);
+      Raven.captureException(e);
       ctx.status = 500;
     }
   }
@@ -96,6 +98,7 @@ class EventsController {
     } catch (e) {
       // eslint-disable-next-line no-console
       // console.error('Deleting event error: ', e);
+      Raven.captureException(e);
       ctx.status = 500;
     }
   }
@@ -129,12 +132,12 @@ class EventsController {
           }
         }
       ]);
-
       ctx.status = 200;
       ctx.body = event;
     } catch (e) {
       // eslint-disable-next-line no-console
       // console.error('Get Single Event error', e);
+      Raven.captureException(e);
       cotx.status = 500;
     }
   }
@@ -152,6 +155,7 @@ class EventsController {
     } catch (e) {
       // eslint-disable-next-line no-console
       // console.error('Update user error', e);
+      Raven.captureException(e);
       ctx.status = 500;
     }
   }
@@ -182,6 +186,7 @@ class EventsController {
     } catch (e) {
       // eslint-disable-next-line no-console
       // console.error('Leave event error: ', e);
+      Raven.captureException(e);
       ctx.status = 500;
     }
   }
@@ -243,12 +248,13 @@ class EventsController {
         { $sort: { attendees: -1 } },
         { $sort: { 'attendees.ratings_average': -1 } }
       ]);
-      // console.log(events);
+      // console.log(events[1]);
       ctx.status = 200;
       ctx.body = JSON.stringify(events);
     } catch (e) {
       // eslint-disable-next-line no-console
       // console.error(`getEvents error ${e}`);
+      Raven.captureException(e);
       ctx.status = 500;
     }
   }

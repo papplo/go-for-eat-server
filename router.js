@@ -30,24 +30,28 @@ const authorize = async (ctx, next) => {
 
 const routes = function (app) {
   router
+    // Authorization
     .post('/api/v1/auth', usersController.auth.bind(usersController))
+    // Get users info
     .get(
       '/api/v1/users/:id',
       authorize,
       usersController.getUser.bind(usersController)
     )
+    // Get my info
     .get('/api/v1/me', authorize, usersController.me.bind(usersController))
+    // Modify my info
     .put(
       '/api/v1/me',
       authorize,
       usersController.editUser.bind(usersController)
     )
+    // Rate user
     .put(
       '/api/v1/users/:id',
       authorize,
       ratingsController.rating.bind(usersController)
     )
-
     .post(
       '/api/v1/events',
       authorize,

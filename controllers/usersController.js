@@ -23,7 +23,8 @@ class UsersController {
         return await this.Users.insert(userData);
       } catch (e) {
         // eslint-disable-next-line no-console
-        console.error('this.Users.insert', e);
+        Raven.captureException(e);
+        // console.error('this.Users.insert', e);
       }
     } else {
       try {
@@ -43,8 +44,10 @@ class UsersController {
         // console.log('update user');
         return await this.Users.findOne({ email: userData.email });
       } catch (e) {
+        Raven.captureException(e);
         // eslint-disable-next-line no-console
-        console.error('Update user error', e);
+        // console.error('Update user error', e);
+        ctx.status = 500;
       }
     }
   }
@@ -139,8 +142,9 @@ class UsersController {
         }
       } catch (e) {
         // eslint-disable-next-line no-console
-        console.error('Facebook validate error', e);
-        ctx.status = 400;
+        Raven.captureException(e);
+        // console.error('Facebook validate error', e);
+        ctx.status = 500;
       }
     } else if (ctx.request.body.network == 'google') {
       // console.log('google ctx.request.body', ctx.request.body);
@@ -240,8 +244,9 @@ class UsersController {
         }
       } catch (e) {
         // eslint-disable-next-line no-console
-        console.error('Google validate error', e);
-        ctx.status = 400;
+        Raven.captureException(e);
+        // console.error('Google validate error', e);
+        ctx.status = 500;
       }
     } else if (ctx.request.body.network == 'linkedin') {
       // console.log('linkedin ctx.request.body', ctx.request.body);
@@ -327,8 +332,9 @@ class UsersController {
         }
       } catch (e) {
         // eslint-disable-next-line no-console
-        console.error('Linkedin validate error', e);
-        ctx.status = 400;
+        Raven.captureException(e);
+        // console.error('Linkedin validate error', e);
+        ctx.status = 500;
       }
     }
   }
@@ -337,7 +343,7 @@ class UsersController {
     if ('GET' != ctx.method) return await next();
     try {
       let user = await this.Users.findOne({ _id: ctx.params.id });
-      if (!user) throw `User ${ctx.params.id} not found in Db`;
+      if (!user) return (ctx.status = 404); // throw `User ${ctx.params.id} not found in Db`;
       user = filterProps(user, [
         '_id',
         'name',
@@ -354,8 +360,9 @@ class UsersController {
       ctx.body = user;
     } catch (e) {
       // eslint-disable-next-line no-console
-      console.error('Get user error', e);
-      cts.status = 404;
+      Raven.captureException(e);
+      // console.error('Get user error', e);
+      cts.status = 500;
     }
   }
 
@@ -393,15 +400,16 @@ class UsersController {
         );
       }
       const user = await this.Users.update(
-        { _id: this.monk.id(ctx.user._id) },
+        { _id: ctx.user._id },
         ctx.request.body.edit
       );
-      if (user.nMatched === 0) throw `User ${ctx.params.id} not found in Db`;
+      if (user.nMatched === 0) return (ctx.status = 404); // throw `User ${ctx.params.id} not found in Db`;
       ctx.status = 204;
     } catch (e) {
       // eslint-disable-next-line no-console
       // console.error('Edit user error', e);
-      ctx.status = 404;
+      Raven.captureException(e);
+      ctx.status = 500;
     }
   }
 }

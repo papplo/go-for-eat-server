@@ -13,7 +13,7 @@ const db = monk(process.env.MONGOLAB_URI);
 const User = db.get('users');
 const Raven = require('raven');
 
-Raven.config(process.env.RAVEN_URI).install();
+Raven.config(process.env.SENTRY_DSN).install();
 
 // Logger
 app
