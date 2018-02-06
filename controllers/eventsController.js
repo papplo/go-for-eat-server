@@ -193,6 +193,7 @@ class EventsController {
         !regexLng.test(ctx.request.query.lng)
       )
         return (ctx.status = 400);
+      const sortQuery = ctx.request.query.sort;
       const lat = Number(ctx.request.query.lat);
       const lng = Number(ctx.request.query.lng);
       const distance = Number(ctx.request.query.dist)
@@ -239,10 +240,12 @@ class EventsController {
             'attendees.description': 0,
             'attendees.interests': 0
           }
-        },
-        { $sort: { attendees: -1 } },
-        { $sort: { 'attendees.ratings_average': -1 } }
+        }
       ]);
+
+      //         { $sort: { attendees: -1 } },
+      // -        { $sort: { 'attendees.ratings_average': -1 } }
+
       ctx.status = 200;
       ctx.body = events;
     } catch (e) {
