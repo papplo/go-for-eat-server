@@ -3,6 +3,10 @@
 const config = require('../config.js');
 const monk = require('monk');
 const db = monk(process.env.MONGOLAB_URI);
+const Raven = require('raven');
+
+Raven.config(process.env.SENTRY_DSN).install();
+m;
 
 const Ratings = db.get('ratings');
 const Users = db.get('users');
@@ -18,7 +22,7 @@ module.exports.rating = async (ctx, next) => {
     }
     const rating = await Ratings.findOne({
       user_id: ctx.params.id,
-      author: ctx.user._id.$id
+      author: ctx.user._id.$oid
     });
     if (!rating) {
       await Ratings.insert({
