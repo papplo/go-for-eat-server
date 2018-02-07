@@ -17,9 +17,9 @@ const Ratings = db.get('ratings');
 // Geo Indexing for MongoDb
 Events.createIndex({ location: '2dsphere' });
 
-const eventsController = new EventsController(Events, monk);
+const eventsController = new EventsController(Events);
 const ratingsController = new RatingsController(Ratings, Users);
-const usersController = new UsersController(Users, Events, monk, Ratings);
+const usersController = new UsersController(Users, Events, Ratings);
 
 const authorize = async (ctx, next) => {
   if (!ctx.user) {

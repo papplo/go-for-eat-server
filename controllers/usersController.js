@@ -10,10 +10,9 @@ const regexLat = /^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?)$/;
 const regexLng = /^[-+]?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))(\.\d+)?)$/;
 
 class UsersController {
-  constructor (Users, Events, monk, Ratings) {
+  constructor (Users, Events, Ratings) {
     this.Users = Users;
     this.Events = Events;
-    this.monk = monk;
     this.Ratings = Ratings;
   }
 
@@ -280,7 +279,8 @@ class UsersController {
   async getUser (ctx, next) {
     if ('GET' != ctx.method) return await next();
     try {
-      let user = await this.Users.findOne({ _id: this.monk.id(ctx.params.id) });
+      const paramId = ctx.params.id;
+      let user = await this.Users.findOne({ _id: paramId });
       if (!user) return (ctx.status = 404);
       user = filterProps(user, [
         '_id',
@@ -295,7 +295,7 @@ class UsersController {
         'profession'
       ]);
       user.myRating = await this.Ratings.findOne({
-        user_id: ctx.params.id,
+        user_id: paramId,
         author: ctx.user._id.$oid
       });
       ctx.status = 200;
