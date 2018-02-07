@@ -22,7 +22,7 @@ class UsersController {
     return await this.Events.aggregate([
       {
         $geoNear: {
-          near: { type: 'Point', coordinates: [position.lat, position.lat] },
+          near: { type: 'Point', coordinates: [position.lng, position.lat] },
           distanceField: 'distance',
           query: { creator: this.monk.id(user._id) },
           spherical: true
