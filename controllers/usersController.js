@@ -10,10 +10,11 @@ const regexLat = /^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?)$/;
 const regexLng = /^[-+]?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))(\.\d+)?)$/;
 
 class UsersController {
-  constructor (Users, Events, monk) {
+  constructor (Users, Events, monk, Ratings) {
     this.Users = Users;
     this.Events = Events;
     this.monk = monk;
+    this.Ratings = Ratings;
   }
 
   // TODO switch to normal fetch event if no position
@@ -295,6 +296,10 @@ class UsersController {
         'description',
         'profession'
       ]);
+      user.myRating = await this.Ratings.findOne({
+        user_id: ctx.params.id,
+        author: ctx.user._id.$id
+      });
       ctx.status = 200;
       ctx.body = user;
     } catch (e) {
