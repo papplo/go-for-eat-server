@@ -17,7 +17,7 @@ module.exports.rating = async (ctx, next) => {
       ctx.body = 'User not found';
     }
     const rating = await Ratings.findOne({
-      _id: ctx.params.id,
+      user_id: ctx.params.id,
       author: ctx.user._id.$id
     });
     if (!rating) {
@@ -27,7 +27,17 @@ module.exports.rating = async (ctx, next) => {
         rating: ctx.request.body.rating
       });
     } else {
-      await Ratings.updateOne({});
+      await Ratings.updateOne(
+        {
+          user_id: ctx.params.id,
+          author: ctx.user._id.$id
+        },
+        {
+          $set: {
+            rating: ctx.request.body.rating
+          }
+        }
+      );
     }
     user.ratings_average =
       (user.ratings_average * user.ratings_number + ctx.request.body.rating) /
