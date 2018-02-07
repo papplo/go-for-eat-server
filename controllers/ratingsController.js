@@ -7,43 +7,47 @@ const db = monk(process.env.MONGOLAB_URI);
 const Ratings = db.get('ratings');
 const Users = db.get('users');
 
+// TODO check if IDs are object or plain id numbers
 module.exports.rating = async (ctx, next) => {
   if ('PUT' != ctx.method) return await next();
-  let rating = await Ratings.findOne({
-    _id: ctx.params.id,
-    author: ctx.user._id
-  });
-  if (!rating) {
-    try {
+  try {
+    const user = await Users.findOne({ _id: monk.id(ctx.params.id) });
+    if (!user) {
+      ctx.status = 404;
+      ctx.body = 'User not found';
+    }
+    const rating = await Ratings.findOne({
+      _id: ctx.params.id,
+      author: ctx.user._id.$id
+    });
+    if (!rating) {
       await Ratings.insert({
         user_id: ctx.params.id,
         author: ctx.request.body.author,
         rating: ctx.request.body.rating
       });
-      let user = await Users.findOne({ _id: ctx.params.id });
-      user.ratings_average =
-        (user.ratings_average * user.ratings_number + ctx.request.body.rating) /
-        (user.ratings_number + 1);
-      user.ratings_number++;
-      await Users.update(
-        { _id: ctx.params.id },
-        {
-          $set: {
-            ratings_number: user.ratings_number,
-            ratings_average: user.ratings_average
-          }
-        }
-      );
-      ctx.status = 200;
-      ctx.body = {
-        ratings_average: user.ratings_average,
-        ratings_number: user.ratings_number
-      };
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.error('Rating user error', e);
+    } else {
+      await Ratings.updateOne({});
     }
-  } else {
-    ctx.status = 403;
+    user.ratings_average =
+      (user.ratings_average * user.ratings_number + ctx.request.body.rating) /
+      (user.ratings_number + 1);
+    user.ratings_number++;
+    await Users.update(
+      { _id: monk.id(ctx.params.id) },
+      {
+        $set: {
+          ratings_number: user.ratings_number,
+          ratings_average: user.ratings_average
+        }
+      }
+    );
+    ctx.status = 200;
+    ctx.body = {
+      ratings_average: user.ratings_average,
+      ratings_number: user.ratings_number
+    };
+  } catch (e) {
+    Raven.captureException(e);
   }
 };
