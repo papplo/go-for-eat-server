@@ -347,8 +347,12 @@ class UsersController {
         }
         update.$set.position;
       }
-      const user = await this.Users.update({ _id: ctx.user._id }, update);
-      if (user.nMatched === 0) return (ctx.status = 404);
+      const resultUpdate = await this.Users.update(
+        { _id: ctx.user._id },
+        update
+      );
+      if (!result.nMatched) return (ctx.status = 404);
+      ctx.body = await this.Users.findOne({ _id: ctx.user._id });
       ctx.status = 204;
     } catch (e) {
       Raven.captureException(e);
