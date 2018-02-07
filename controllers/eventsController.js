@@ -210,7 +210,7 @@ class EventsController {
       const to = Number(ctx.request.query.to)
         ? Number(ctx.request.query.to)
         : Date.now() + 3600 * 24 * 7 * 1000;
-      const events = await this.Events.aggregate([
+      const aggeregationQuery = [
         {
           $geoNear: {
             near: { type: 'Point', coordinates: [lng, lat] },
@@ -242,12 +242,21 @@ class EventsController {
             'attendees.description': 0,
             'attendees.interests': 0
           }
-        },
-        { $sort: { attendees: -1 } },
-        { $sort: { 'attendees.ratings_average': -1 } }
-      ]);
+        }
+      ];
+      ctx.request.query.sort
+        ? aggeregationQuery.push(
+          { $sort: { attendees: -1 } },
+          { $sort: { 'attendees.ratings_average': -1 } }
+        )
+        : null;
+      const events = await this.Events.aggregate(aggeregationQuery);
+
+      //         { $sort: { attendees: -1 } },
+      // -        { $sort: { 'attendees.ratings_average': -1 } }
+
       ctx.status = 200;
-      ctx.body = events;
+      ctx.body = ctx.request.query.sort ? (events[0] ? events[0] : []) : events;
     } catch (e) {
       Raven.captureException(e);
       ctx.status = 500;
