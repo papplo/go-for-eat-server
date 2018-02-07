@@ -193,7 +193,6 @@ class EventsController {
         !regexLng.test(ctx.request.query.lng)
       )
         return (ctx.status = 400);
-      const sortQuery = ctx.request.query.sort;
       const lat = Number(ctx.request.query.lat);
       const lng = Number(ctx.request.query.lng);
       const distance = Number(ctx.request.query.dist)
