@@ -17,7 +17,6 @@ class UsersController {
     this.Ratings = Ratings;
   }
 
-  // TODO switch to normal fetch event if no position
   async _fetchCreatedEvents (user, position) {
     return await this.Events.aggregate([
       {
@@ -176,7 +175,6 @@ class UsersController {
             user,
             ctx.request.body.position
           );
-          // console.log('user', user);
           if (user.email) {
             ctx.status = 200;
             ctx.body = { user };
