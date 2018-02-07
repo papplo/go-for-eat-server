@@ -296,7 +296,7 @@ class UsersController {
       ]);
       user.myRating = await this.Ratings.findOne({
         user_id: ctx.params.id,
-        author: ctx.user._id.$id
+        author: ctx.user._id.$oid
       });
       ctx.status = 200;
       ctx.body = user;

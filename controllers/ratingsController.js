@@ -7,7 +7,6 @@ const Raven = require('raven');
 
 Raven.config(process.env.SENTRY_DSN).install();
 
-// TODO check if IDs are object or plain id numbers
 class RatingsController {
   constructor (Ratings, Users) {
     this.Ratings = Ratings;
@@ -18,7 +17,6 @@ class RatingsController {
     if ('PUT' != ctx.method) return await next();
     try {
       const user = await Users.findOne({ _id: monk.id(ctx.params.id) });
-      console.log(user);
 
       if (!user) {
         ctx.status = 404;
