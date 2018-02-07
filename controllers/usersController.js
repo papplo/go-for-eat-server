@@ -4,10 +4,11 @@ const config = require('../config.js');
 const filterProps = require('../services/utils').filterProps;
 
 class UsersController {
-  constructor (Users, Events, monk) {
+  constructor (Users, Events, monk, Ratings) {
     this.Users = Users;
     this.Events = Events;
     this.monk = monk;
+    this.Ratings = Ratings;
   }
 
   async _userDB (userData) {
@@ -331,6 +332,10 @@ class UsersController {
         'description',
         'profession'
       ]);
+      user.myRating = await this.Ratings.findOne({
+        user_id: ctx.params.id,
+        author: ctx.user._id.$id
+      });
       ctx.status = 200;
       ctx.body = user;
     } catch (e) {
