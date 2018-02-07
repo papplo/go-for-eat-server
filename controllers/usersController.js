@@ -17,12 +17,11 @@ class UsersController {
     this.Ratings = Ratings;
   }
 
-  // TODO switch to normal fetch event if no position
   async _fetchCreatedEvents (user, position) {
     return await this.Events.aggregate([
       {
         $geoNear: {
-          near: { type: 'Point', coordinates: [position.lat, position.lat] },
+          near: { type: 'Point', coordinates: [position.lng, position.lat] },
           distanceField: 'distance',
           query: { creator: this.monk.id(user._id) },
           spherical: true
@@ -176,7 +175,6 @@ class UsersController {
             user,
             ctx.request.body.position
           );
-          // console.log('user', user);
           if (user.email) {
             ctx.status = 200;
             ctx.body = { user };

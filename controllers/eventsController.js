@@ -44,8 +44,6 @@ class EventsController {
       ctx.status = 201;
       ctx.body = { event };
     } catch (e) {
-      // eslint-disable-next-line no-console
-      // console.error('Event create error: ', e);
       Raven.captureException(e);
       ctx.status = 500;
     }
@@ -137,8 +135,6 @@ class EventsController {
       ctx.status = 200;
       ctx.body = event;
     } catch (e) {
-      // eslint-disable-next-line no-console
-      // console.error('Get Single Event error', e);
       Raven.captureException(e);
       cotx.status = 500;
     }
@@ -251,10 +247,6 @@ class EventsController {
         )
         : null;
       const events = await this.Events.aggregate(aggeregationQuery);
-
-      //         { $sort: { attendees: -1 } },
-      // -        { $sort: { 'attendees.ratings_average': -1 } }
-
       ctx.status = 200;
       ctx.body = ctx.request.query.sort ? (events[0] ? events[0] : []) : events;
     } catch (e) {
