@@ -19,7 +19,8 @@ Events.createIndex({ location: '2dsphere' });
 
 const eventsController = new EventsController(Events);
 const ratingsController = new RatingsController(Ratings, Users);
-const usersController = new UsersController(Users, Events, Ratings);
+// monk here is mandatory!
+const usersController = new UsersController(Users, Events, monk, Ratings);
 
 const authorize = async (ctx, next) => {
   if (!ctx.user) {

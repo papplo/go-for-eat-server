@@ -18,7 +18,7 @@ class RatingsController {
     try {
       const paramId = ctx.params.id;
       const user = await this.Users.findOne({
-        _id: paramId
+        _id: ctx.params.id
       });
       if (!user) {
         ctx.status = 404;
@@ -35,7 +35,7 @@ class RatingsController {
           rating: ctx.request.body.rating
         });
       } else {
-        await this.Ratings.updateOne(
+        await this.Ratings.update(
           {
             user_id: paramId,
             author: ctx.user._id.$oid
@@ -50,8 +50,9 @@ class RatingsController {
       user.ratings_average =
         !user.ratings_average && !user.ratings_number
           ? Number(ctx.request.body.rating)
-          : user.ratings_average * user.ratings_number +
-            Number(ctx.request.body.rating) / (user.ratings_number + 1);
+          : (user.ratings_average * user.ratings_number +
+              Number(ctx.request.body.rating)) /
+            (user.ratings_number + 1);
       user.ratings_number++;
       user.ratings_average = Math.round(user.ratings_average * 10) / 10;
       await this.Users.update(

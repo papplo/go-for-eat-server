@@ -10,9 +10,10 @@ const regexLat = /^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?)$/;
 const regexLng = /^[-+]?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))(\.\d+)?)$/;
 
 class UsersController {
-  constructor (Users, Events, Ratings) {
+  constructor (Users, Events, monk, Ratings) {
     this.Users = Users;
     this.Events = Events;
+    this.monk = monk;
     this.Ratings = Ratings;
   }
 
@@ -22,6 +23,7 @@ class UsersController {
         $geoNear: {
           near: { type: 'Point', coordinates: [position.lng, position.lat] },
           distanceField: 'distance',
+          // do not change monk.id
           query: { creator: this.monk.id(user._id) },
           spherical: true
         }
@@ -57,6 +59,7 @@ class UsersController {
         $geoNear: {
           near: { type: 'Point', coordinates: [position.lng, position.lat] },
           distanceField: 'distance',
+          // do not change monk.id
           query: { attendees: this.monk.id(user._id) },
           spherical: true
         }
