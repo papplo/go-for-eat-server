@@ -330,6 +330,25 @@ class UsersController {
             ? ctx.request.body.edit.profession.substring(0, 139)
             : ctx.request.body.edit.profession;
       }
+      if (ctx.request.body.edit.position) {
+        if (
+          ctx.request.body.edit.position.lng ||
+          ctx.request.body.edit.position.lat
+        ) {
+          ctx.status = 403;
+          ctx.body = 'Missing position parameters';
+          return;
+        }
+        if (
+          !regexLat.test(ctx.request.body.edit.position.lat) ||
+          !regexLng.test(ctx.request.body.edit.position.lng)
+        ) {
+          ctx.status = 400;
+          ctx.body = 'Bad position coordinates';
+          return;
+        }
+        update.$set.position;
+      }
       const user = await this.Users.update({ _id: ctx.user._id }, update);
       if (user.nMatched === 0) return (ctx.status = 404);
       ctx.status = 204;
