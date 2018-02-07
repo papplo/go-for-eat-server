@@ -2,6 +2,9 @@
 const axios = require('axios');
 const config = require('../config.js');
 const filterProps = require('../services/utils').filterProps;
+const Raven = require('raven');
+
+Raven.config(process.env.SENTRY_DSN).install();
 
 const regexLat = /^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?)$/;
 const regexLng = /^[-+]?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))(\.\d+)?)$/;
@@ -172,7 +175,7 @@ class UsersController {
             user,
             ctx.request.body.position
           );
-          console.log('user', user);
+          // console.log('user', user);
           if (user.email) {
             ctx.status = 200;
             ctx.body = { user };
@@ -330,8 +333,8 @@ class UsersController {
       }
       if (ctx.request.body.edit.position) {
         if (
-          ctx.request.body.edit.position.lng ||
-          ctx.request.body.edit.position.lat
+          !ctx.request.body.edit.position.lng ||
+          !ctx.request.body.edit.position.lat
         ) {
           ctx.status = 403;
           ctx.body = 'Missing position parameters';
@@ -351,7 +354,7 @@ class UsersController {
         { _id: ctx.user._id },
         update
       );
-      if (!result.nMatched) return (ctx.status = 404);
+      if (!resultUpdate.nMatched) return (ctx.status = 404);
       ctx.body = await this.Users.findOne({ _id: ctx.user._id });
       ctx.status = 204;
     } catch (e) {
