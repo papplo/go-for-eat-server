@@ -83,10 +83,10 @@ describe('Test correct response on events functions calls', () => {
     expect(ctx.status).toEqual(200);
   });
 
-  test('Return 204 on joining an event', async () => {
+  test('Return 200 on joining an event', async () => {
     ctx.method = 'PUT';
     await eventController.joinEvent(ctx, next);
-    expect(ctx.status).toEqual(204);
+    expect(ctx.status).toEqual(200);
   });
 
   test('Return 200 on leaving an event', async () => {
