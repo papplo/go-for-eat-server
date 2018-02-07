@@ -3,7 +3,7 @@ const router = require('koa-router')();
 
 const UsersController = require('./controllers/usersController');
 const EventsController = require('./controllers/eventsController');
-const ratingsController = require('./controllers/ratingsController');
+const RatingsController = require('./controllers/ratingsController');
 
 // MongoDb configure
 const monk = require('monk');
@@ -18,6 +18,7 @@ const Ratings = db.get('ratings');
 Events.createIndex({ location: '2dsphere' });
 
 const eventsController = new EventsController(Events, monk);
+const ratingsController = new RatingsController(Ratings, Users);
 const usersController = new UsersController(Users, Events, monk, Ratings);
 
 const authorize = async (ctx, next) => {
@@ -51,7 +52,7 @@ const routes = function (app) {
     .put(
       '/api/v1/users/:id',
       authorize,
-      ratingsController.rating.bind(usersController)
+      ratingsController.rateUser.bind(ratingsController)
     )
     .post(
       '/api/v1/events',
