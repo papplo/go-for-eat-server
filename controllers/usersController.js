@@ -310,6 +310,22 @@ class UsersController {
 
   async me (ctx, next) {
     if ('GET' != ctx.method) return await next();
+    if (!ctx.request.query.lat || !ctx.request.query.lng)
+      return (ctx.status = 400);
+    if (
+      !regexLat.test(ctx.request.query.lat) ||
+      !regexLng.test(ctx.request.query.lng)
+    )
+      return (ctx.status = 400);
+    const position = {
+      lat: Number(ctx.request.query.lat),
+      lng: Number(ctx.request.query.lng)
+    };
+    ctx.user.created_events = await this._fetchCreatedEvents(
+      ctx.user,
+      position
+    );
+    ctx.user.events = await this._fetchAttendedEvents(ctx.user, position);
     ctx.status = 200;
     ctx.body = ctx.user;
   }
