@@ -31,7 +31,7 @@ class RatingsController {
       if (!rating) {
         await Ratings.insert({
           user_id: ctx.params.id,
-          author: ctx.request.body.author,
+          author: ctx.user._id.$oid,
           rating: ctx.request.body.rating
         });
       } else {
