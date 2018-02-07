@@ -152,7 +152,8 @@ class EventsController {
         { $addToSet: { attendees: ctx.user._id } }
       );
       if (updateResult.nMatched === 0) return (ctx.status = 404); //throw `Event ${ctx.params.id} not found`;
-      ctx.status = 204;
+      ctx.body = { join: 'ok' };
+      ctx.status = 200;
     } catch (e) {
       Raven.captureException(e);
       ctx.status = 500;
