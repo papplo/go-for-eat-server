@@ -3,6 +3,9 @@ const axios = require('axios');
 const config = require('../config.js');
 const filterProps = require('../services/utils').filterProps;
 
+const regexLat = /^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?)$/;
+const regexLng = /^[-+]?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))(\.\d+)?)$/;
+
 class UsersController {
   constructor (Users, Events, monk) {
     this.Users = Users;
@@ -10,13 +13,14 @@ class UsersController {
     this.monk = monk;
   }
 
+  // TODO switch to normal fetch event if no position
   async _fetchCreatedEvents (user, position) {
     return await this.Events.aggregate([
       {
         $geoNear: {
-          near: { type: 'Point', coordinates: [position.lng, position.lat] },
+          near: { type: 'Point', coordinates: [position.lat, position.lat] },
           distanceField: 'distance',
-          query: { $match: { creator: this.monk.id(user._id) } },
+          query: { creator: this.monk.id(user._id) },
           spherical: true
         }
       },
@@ -52,7 +56,7 @@ class UsersController {
         $geoNear: {
           near: { type: 'Point', coordinates: [position.lng, position.lat] },
           distanceField: 'distance',
-          query: { $match: { attendees: this.monk.id(user._id) } },
+          query: { attendees: this.monk.id(user._id) },
           spherical: true
         }
       },
@@ -105,6 +109,7 @@ class UsersController {
               profile_picture: userData.profile_picture,
               birthday: userData.birthday,
               gender: userData.gender,
+              position: userData.position,
               accessToken: userData.accessToken
             }
           }
@@ -119,6 +124,25 @@ class UsersController {
 
   async auth (ctx, next) {
     if ('POST' != ctx.method) return await next();
+    if (!ctx.request.body.position.lat) {
+      ctx.status = 400;
+      ctx.body = 'Latitude coordinate not present';
+    }
+    if (!ctx.request.body.position.lat) {
+      ctx.status = 400;
+      ctx.body = 'Longitude coordinate not present';
+    }
+    if (!ctx.request.body.position) {
+      ctx.status = 400;
+      ctx.body = 'Position field not sent';
+    }
+    if (
+      !regexLat.test(ctx.request.body.position.lat) ||
+      !regexLng.test(ctx.request.body.position.lng)
+    ) {
+      ctx.status = 400;
+      ctx.body = 'Bad position coordinates';
+    }
     if (ctx.request.body.network == 'facebook') {
       try {
         const authResult = await axios.get(
@@ -136,19 +160,21 @@ class UsersController {
             profile_picture: authResult.data.picture.data.url,
             birthday: authResult.data.birthday,
             gender: authResult.data.gender,
+            position: ctx.request.body.position,
             events: [],
             created_events: [],
             accessToken: `FB${ctx.request.body.accessToken}`
           };
           user = await this._userDB(user);
-          user.created_events = await _fetchCreatedEvents(
+          user.created_events = await this._fetchCreatedEvents(
             user,
-            authResult.data.position
+            ctx.request.body.position
           );
-          user.events = await _fetchAttendedEvents(
+          user.events = await this._fetchAttendedEvents(
             user,
-            authResult.data.position
+            ctx.request.body.position
           );
+          console.log('user', user);
           if (user.email) {
             ctx.status = 200;
             ctx.body = { user };
@@ -187,16 +213,17 @@ class UsersController {
             profile_picture: authResult.data.picture,
             birthday: birthday,
             gender: authResult.data.gender,
+            position: ctx.request.body.position,
             accessToken: `GO${ctx.request.body.accessToken}`
           };
           user = await this._userDB(user);
-          user.created_events = await _fetchCreatedEvents(
+          user.created_events = await this._fetchCreatedEvents(
             user,
-            authResult.data.position
+            ctx.request.body.position
           );
-          user.events = await _fetchAttendedEvents(
+          user.events = await this._fetchAttendedEvents(
             user,
-            authResult.data.position
+            ctx.request.body.position
           );
           if (user.email) {
             ctx.status = 200;
@@ -223,18 +250,19 @@ class UsersController {
             birthday: '',
             gender: '',
             profession: authResult.data.position,
+            position: ctx.request.body.position,
             events: [],
             created_events: [],
             accessToken: `LI${ctx.request.body.accessToken}`
           };
           user = await this._userDB(user);
-          user.created_events = await _fetchCreatedEvents(
+          user.created_events = await this._fetchCreatedEvents(
             user,
-            authResult.data.position
+            ctx.request.body.position
           );
-          user.events = await _fetchAttendedEvents(
+          user.events = await this._fetchAttendedEvents(
             user,
-            authResult.data.position
+            ctx.request.body.position
           );
           if (user.email) {
             ctx.status = 200;
