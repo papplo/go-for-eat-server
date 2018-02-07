@@ -91,7 +91,7 @@ class UsersController {
     const user = await this.Users.findOne({ email: userData.email });
     if (!user) {
       try {
-        userData.ratings_number = userData.ratings_average = '0';
+        userData.ratings_number = userData.ratings_average = 0;
         userData.description = userData.profession = '';
         userData.interests = '';
         return await this.Users.insert(userData);
@@ -280,7 +280,7 @@ class UsersController {
   async getUser (ctx, next) {
     if ('GET' != ctx.method) return await next();
     try {
-      let user = await this.Users.findOne({ _id: ctx.params.id });
+      let user = await this.Users.findOne({ _id: this.monk.id(ctx.params.id) });
       if (!user) return (ctx.status = 404);
       user = filterProps(user, [
         '_id',

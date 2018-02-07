@@ -51,7 +51,6 @@ app
     ctx.token = authorization.split(' ')[1];
     // console.log('authorization accessToken', ctx.token);
     ctx.user = await User.findOne({ accessToken: ctx.token });
-    // console.log(ctx.user._id);
     return await next();
   });
 

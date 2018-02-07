@@ -16,26 +16,28 @@ class RatingsController {
   async rateUser (ctx, next) {
     if ('PUT' != ctx.method) return await next();
     try {
-      const user = await Users.findOne({ _id: monk.id(ctx.params.id) });
-
+      const paramId = ctx.params.id;
+      const user = await this.Users.findOne({
+        _id: paramId
+      });
       if (!user) {
         ctx.status = 404;
         ctx.body = 'User not found';
       }
-      const rating = await Ratings.findOne({
-        user_id: ctx.params.id,
+      const rating = await this.Ratings.findOne({
+        user_id: paramId,
         author: ctx.user._id.$oid
       });
       if (!rating) {
-        await Ratings.insert({
-          user_id: ctx.params.id,
+        await this.Ratings.insert({
+          user_id: paramId,
           author: ctx.user._id.$oid,
           rating: ctx.request.body.rating
         });
       } else {
-        await Ratings.updateOne(
+        await this.Ratings.updateOne(
           {
-            user_id: ctx.params.id,
+            user_id: paramId,
             author: ctx.user._id.$oid
           },
           {
@@ -46,11 +48,14 @@ class RatingsController {
         );
       }
       user.ratings_average =
-        (user.ratings_average * user.ratings_number + ctx.request.body.rating) /
-        (user.ratings_number + 1);
+        !user.ratings_average && !user.ratings_number
+          ? Number(ctx.request.body.rating)
+          : user.ratings_average * user.ratings_number +
+            Number(ctx.request.body.rating) / (user.ratings_number + 1);
       user.ratings_number++;
-      await Users.update(
-        { _id: monk.id(ctx.params.id) },
+      user.ratings_average = Math.round(user.ratings_average * 10) / 10;
+      await this.Users.update(
+        { _id: paramId },
         {
           $set: {
             ratings_number: user.ratings_number,

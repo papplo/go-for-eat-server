@@ -50,7 +50,7 @@ const routes = function (app) {
     )
     // Rate user
     .put(
-      '/api/v1/users/:id',
+      '/api/v1/users/:id/rating',
       authorize,
       ratingsController.rateUser.bind(ratingsController)
     )

@@ -65,8 +65,9 @@ class EventsController {
         !regexLng.test(ctx.request.body.location.coordinates[0])
       )
         return (ctx.status = 400);
+      const paramId = ctx.params.id;
       const updateResult = await this.Events.update(
-        { _id: ctx.params.id },
+        { _id: paramId },
         {
           $set: {
             place_id: ctx.request.body.place_id,
@@ -89,13 +90,14 @@ class EventsController {
   async deleteEvent (ctx, next) {
     if ('DELETE' != ctx.method) return await next();
     try {
+      const paramId = ctx.params.id;
       const event = await this.Events.findOne({
-        _id: ctx.params.id,
+        _id: paramId,
         creator: ctx.user._id
       });
-      if (event && event.attendees.length === 1)
-        await this.Events.remove({ _id: this.monk.id(ctx.params.id) });
-      else return (ctx.status = 404);
+      if (event && event.attendees.length === 1) {
+        await this.Events.remove({ _id: paramId });
+      } else return (ctx.status = 404);
       ctx.status = 204;
     } catch (e) {
       Raven.captureException(e);
@@ -106,8 +108,10 @@ class EventsController {
   async getEvent (ctx, next) {
     if ('GET' != ctx.method) return await next();
     try {
+      const paramId = ctx.params.id;
+
       const event = await this.Events.aggregate([
-        { $match: { _id: this.monk.id(ctx.params.id) } },
+        { $match: { _id: paramId } },
         {
           $lookup: {
             from: 'users',
@@ -143,8 +147,9 @@ class EventsController {
   async joinEvent (ctx, next) {
     if ('PUT' != ctx.method) return await next();
     try {
+      const paramId = ctx.params.id;
       const updateResult = await this.Events.update(
-        { _id: ctx.params.id, 'attendees.3': { $exists: false } },
+        { _id: paramId, 'attendees.3': { $exists: false } },
         { $addToSet: { attendees: ctx.user._id } }
       );
       if (updateResult.nMatched === 0) return (ctx.status = 404); //throw `Event ${ctx.params.id} not found`;
@@ -157,8 +162,9 @@ class EventsController {
 
   async leaveEvent (ctx, next) {
     if ('DELETE' != ctx.method) return await next();
+    const paramId = ctx.params.id;
     let event = await this.Events.findOne({
-      _id: ctx.params.id,
+      _id: paramId,
       attendees: ctx.user._id,
       'attendees.1': { $exists: true }
     });
@@ -167,13 +173,13 @@ class EventsController {
     }
     try {
       const update = await this.Events.update(
-        { _id: ctx.params.id },
+        { _id: paramId },
         {
           $pull: { attendees: ctx.user._id },
           $set: { creator: event.creator }
         }
       );
-      event = await this.Events.findOne({ _id: ctx.params.id });
+      event = await this.Events.findOne({ _id: paramId });
       ctx.body = { event };
       ctx.status = 200;
     } catch (e) {
