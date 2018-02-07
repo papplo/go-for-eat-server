@@ -12,12 +12,13 @@ const db = monk(process.env.MONGOLAB_URI);
 // Creating Db instances
 const Events = db.get('events');
 const Users = db.get('users');
+const Ratings = db.get('ratings');
 
 // Geo Indexing for MongoDb
 Events.createIndex({ location: '2dsphere' });
 
 const eventsController = new EventsController(Events, monk);
-const usersController = new UsersController(Users, Events, monk);
+const usersController = new UsersController(Users, Events, monk, Ratings);
 
 const authorize = async (ctx, next) => {
   if (!ctx.user) {
