@@ -50,18 +50,14 @@ class UsersController {
   }
 
   async _fetchCreatedEvents (user, position) {
-    aggregateQuery[0].$geoNear.near.coordinates
-      .push(position.lng)
-      .push(position.lat);
+    aggregateQuery[0].$geoNear.near.coordinates = [position.lng, position.lat];
     // do not change monk.id
     aggregateQuery[0].$geoNear.query = { creator: this.monk.id(user._id) };
     return await this.Events.aggregate(aggregateQuery);
   }
 
   async _fetchAttendedEvents (user, position) {
-    aggregateQuery[0].$geoNear.near.coordinates
-      .push(position.lng)
-      .push(position.lat);
+    aggregateQuery[0].$geoNear.near.coordinates = [position.lng, position.lat];
     // do not change monk.id
     aggregateQuery[0].$geoNear.query = { creator: this.monk.id(user._id) };
     return await this.Events.aggregate(aggregateQuery);
