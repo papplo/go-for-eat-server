@@ -6,6 +6,7 @@
   "dependencies": {
     "axios": "^0.17.1",
     "dotenv": "^4.0.0",
+    "http-errors": "^1.6.2",
     "kcors": "^2.2.1",
     "koa": "^2.4.1",
     "koa-bodyparser": "^4.2.0",

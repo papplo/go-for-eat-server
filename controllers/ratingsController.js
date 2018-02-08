@@ -21,8 +21,7 @@ class RatingsController {
         _id: ctx.params.id
       });
       if (!user) {
-        ctx.status = 404;
-        ctx.body = 'User not found';
+        ctx.assert(user, 401, 'User not found');
       }
       const rating = await this.Ratings.findOne({
         user_id: paramId,
@@ -71,6 +70,7 @@ class RatingsController {
       };
     } catch (e) {
       Raven.captureException(e);
+      ctx.throw(500);
     }
   }
 }

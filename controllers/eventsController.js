@@ -27,18 +27,19 @@ class EventsController {
     };
     try {
       for (const key in newEvent) {
-        if (!newEvent[key]) return (ctx.status = 400);
+        if (!newEvent[key])
+          ctx.throw(400, 'Missing required field', { field: newEvent[key] });
       }
       if (
         !ctx.request.body.location.coordinates[1] ||
         !ctx.request.body.location.coordinates[0]
       )
-        return (ctx.status = 400);
+        ctx.throw(400, 'Missing position coordinates');
       if (
         !regexLat.test(ctx.request.body.location.coordinates[1]) ||
         !regexLng.test(ctx.request.body.location.coordinates[0])
       )
-        return (ctx.status = 400);
+        ctx.throw(403, 'Bad coordinates type');
       const event = await this.Events.insert(newEvent);
       ctx.status = 201;
       ctx.body = { event };
@@ -52,18 +53,21 @@ class EventsController {
     if ('PUT' != ctx.method) return await next();
     try {
       for (const key in ctx.request.body) {
-        if (!ctx.request.body[key]) return (ctx.status = 400);
+        if (!ctx.request.body[key])
+          ctx.throw(400, 'Missing required field', {
+            field: ctx.request.body[key]
+          });
       }
       if (
         !Array.isArray(ctx.request.body.location.coordinates) ||
         ctx.request.body.location.coordinates.length != 2
       )
-        return (ctx.status = 400);
+        ctx.throw(400, 'Missing position coordinates');
       if (
         !regexLat.test(ctx.request.body.location.coordinates[1]) ||
         !regexLng.test(ctx.request.body.location.coordinates[0])
       )
-        return (ctx.status = 400);
+        ctx.throw(403, 'Bad coordinates type');
       const paramId = ctx.params.id;
       const updateResult = await this.Events.update(
         { _id: paramId },
@@ -78,11 +82,11 @@ class EventsController {
           }
         }
       );
-      if (updateResult.nMatched === 0) return (ctx.status = 404);
+      if (updateResult.nMatched === 0) ctx.assert(404, 'Event not found');
       ctx.status = 204;
     } catch (e) {
       Raven.captureException(e);
-      ctx.status = 500;
+      // ctx.status = 500;
     }
   }
 
@@ -139,7 +143,7 @@ class EventsController {
       ctx.body = event;
     } catch (e) {
       Raven.captureException(e);
-      cotx.status = 500;
+      ctx.throw(500);
     }
   }
 
@@ -156,7 +160,7 @@ class EventsController {
       ctx.status = 200;
     } catch (e) {
       Raven.captureException(e);
-      ctx.status = 500;
+      ctx.throw(500);
     }
   }
 
@@ -184,7 +188,7 @@ class EventsController {
       ctx.status = 200;
     } catch (e) {
       Raven.captureException(e);
-      ctx.status = 500;
+      ctx.throw(500);
     }
   }
 
@@ -192,12 +196,12 @@ class EventsController {
     if ('GET' != ctx.method) return await next();
     try {
       if (!ctx.request.query.lat || !ctx.request.query.lng)
-        return (ctx.status = 400);
+        ctx.throw(400, 'Latitude or Longitude coordinates not present');
       if (
         !regexLat.test(ctx.request.query.lat) ||
         !regexLng.test(ctx.request.query.lng)
       )
-        return (ctx.status = 400);
+        ctx.throw(403, 'Bad coordinates type');
       const lat = Number(ctx.request.query.lat);
       const lng = Number(ctx.request.query.lng);
       const distance = Number(ctx.request.query.dist)
@@ -257,7 +261,7 @@ class EventsController {
       ctx.body = ctx.request.query.sort ? (events[0] ? events[0] : []) : events;
     } catch (e) {
       Raven.captureException(e);
-      ctx.status = 500;
+      ctx.throw(500);
     }
   }
 }
