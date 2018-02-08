@@ -26,19 +26,18 @@ class RatingsController {
       }
       const rating = await this.Ratings.findOne({
         user_id: paramId,
-        author: ctx.user._id.$oid
+        author: ctx.user._id
       });
       if (!rating) {
         await this.Ratings.insert({
           user_id: paramId,
-          author: ctx.user._id.$oid,
+          author: ctx.user._id,
           rating: ctx.request.body.rating
         });
       } else {
         await this.Ratings.update(
           {
-            user_id: paramId,
-            author: ctx.user._id.$oid
+            $and: [{ user_id: paramId }, { author: ctx.user._id }]
           },
           {
             $set: {
