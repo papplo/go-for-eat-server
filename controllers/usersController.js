@@ -142,9 +142,9 @@ class UsersController {
         );
         if (authResult.data.id == ctx.request.body.id) {
           user = {
-            name: authResult.data.given_name,
+            name: authResult.data.first_name,
             email: authResult.data.email,
-            profile_picture: authResult.data.picture,
+            profile_picture: authResult.data.picture.data.url,
             birthday: authResult.data.birthday,
             gender: authResult.data.gender,
             position: ctx.request.body.position,
