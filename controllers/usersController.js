@@ -69,7 +69,7 @@ class UsersController {
   async _fetchAttendedEvents (user, position) {
     aggregateQuery[0].$geoNear.near.coordinates = [position.lng, position.lat];
     // do not change monk.id
-    aggregateQuery[0].$geoNear.query = { creator: this.monk.id(user._id) };
+    aggregateQuery[0].$geoNear.query = { attendees: this.monk.id(user._id) };
     return await this.Events.aggregate(aggregateQuery);
   }
 
