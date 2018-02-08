@@ -9,6 +9,38 @@ Raven.config(process.env.SENTRY_DSN).install();
 const regexLat = /^[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?)$/;
 const regexLng = /^[-+]?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))(\.\d+)?)$/;
 
+const aggregateQuery = [
+  {
+    $geoNear: {
+      near: { type: 'Point', coordinates: [] },
+      distanceField: 'distance',
+      spherical: true
+    }
+  },
+  {
+    $lookup: {
+      from: 'users',
+      localField: 'attendees',
+      foreignField: '_id',
+      as: 'attendees'
+    }
+  },
+  {
+    $project: {
+      'attendees.email': 0,
+      'attendees.birthday': 0,
+      'attendees.gender': 0,
+      'attendees.events': 0,
+      'attendees.created_events': 0,
+      'attendees.accessToken': 0,
+      'attendees.ratings_number': 0,
+      'attendees.profession': 0,
+      'attendees.description': 0,
+      'attendees.interests': 0
+    }
+  }
+];
+
 class UsersController {
   constructor (Users, Events, monk, Ratings) {
     this.Users = Users;
@@ -18,75 +50,21 @@ class UsersController {
   }
 
   async _fetchCreatedEvents (user, position) {
-    return await this.Events.aggregate([
-      {
-        $geoNear: {
-          near: { type: 'Point', coordinates: [position.lng, position.lat] },
-          distanceField: 'distance',
-          // do not change monk.id
-          query: { creator: this.monk.id(user._id) },
-          spherical: true
-        }
-      },
-      {
-        $lookup: {
-          from: 'users',
-          localField: 'attendees',
-          foreignField: '_id',
-          as: 'attendees'
-        }
-      },
-      {
-        $project: {
-          'attendees.email': 0,
-          'attendees.birthday': 0,
-          'attendees.gender': 0,
-          'attendees.events': 0,
-          'attendees.created_events': 0,
-          'attendees.accessToken': 0,
-          'attendees.ratings_number': 0,
-          'attendees.profession': 0,
-          'attendees.description': 0,
-          'attendees.interests': 0
-        }
-      }
-    ]);
+    aggregateQuery[0].$geoNear.near.coordinates
+      .push(position.lng)
+      .push(position.lat);
+    // do not change monk.id
+    aggregateQuery[0].$geoNear.query = { creator: this.monk.id(user._id) };
+    return await this.Events.aggregate(aggregateQuery);
   }
 
   async _fetchAttendedEvents (user, position) {
-    return await this.Events.aggregate([
-      {
-        $geoNear: {
-          near: { type: 'Point', coordinates: [position.lng, position.lat] },
-          distanceField: 'distance',
-          // do not change monk.id
-          query: { attendees: this.monk.id(user._id) },
-          spherical: true
-        }
-      },
-      {
-        $lookup: {
-          from: 'users',
-          localField: 'attendees',
-          foreignField: '_id',
-          as: 'attendees'
-        }
-      },
-      {
-        $project: {
-          'attendees.email': 0,
-          'attendees.birthday': 0,
-          'attendees.gender': 0,
-          'attendees.events': 0,
-          'attendees.created_events': 0,
-          'attendees.accessToken': 0,
-          'attendees.ratings_number': 0,
-          'attendees.profession': 0,
-          'attendees.description': 0,
-          'attendees.interests': 0
-        }
-      }
-    ]);
+    aggregateQuery[0].$geoNear.near.coordinates
+      .push(position.lng)
+      .push(position.lat);
+    // do not change monk.id
+    aggregateQuery[0].$geoNear.query = { creator: this.monk.id(user._id) };
+    return await this.Events.aggregate(aggregateQuery);
   }
 
   async _userDB (userData) {
