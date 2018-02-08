@@ -41,6 +41,16 @@ const aggregateQuery = [
   }
 ];
 
+let user = {
+  name: '',
+  email: '',
+  profile_picture: '',
+  birthday: '',
+  gender: '',
+  position: '',
+  accessToken: ''
+};
+
 class UsersController {
   constructor (Users, Events, monk, Ratings) {
     this.Users = Users;
@@ -131,15 +141,13 @@ class UsersController {
           }
         );
         if (authResult.data.id == ctx.request.body.id) {
-          let user = {
-            name: authResult.data.first_name,
+          user = {
+            name: authResult.data.given_name,
             email: authResult.data.email,
-            profile_picture: authResult.data.picture.data.url,
+            profile_picture: authResult.data.picture,
             birthday: authResult.data.birthday,
             gender: authResult.data.gender,
             position: ctx.request.body.position,
-            events: [],
-            created_events: [],
             accessToken: `FB${ctx.request.body.accessToken}`
           };
           user = await this._userDB(user);
@@ -177,17 +185,15 @@ class UsersController {
               Authorization: `Bearer ${ctx.request.body.accessToken}`
             }
           });
-
-          const birthday = data.birthdays[1]
-            ? `${data.birthdays[1].date.month}/${data.birthdays[1].date.day}/${
-              data.birthdays[1].date.year
-            }`
-            : '';
-          let user = {
+          user = {
             name: authResult.data.given_name,
             email: authResult.data.email,
             profile_picture: authResult.data.picture,
-            birthday: birthday,
+            birthday: data.birthdays[1]
+              ? `${data.birthdays[1].date.month}/${
+                data.birthdays[1].date.day
+              }/${data.birthdays[1].date.year}`
+              : '',
             gender: authResult.data.gender,
             position: ctx.request.body.position,
             accessToken: `GO${ctx.request.body.accessToken}`
@@ -219,16 +225,12 @@ class UsersController {
           }
         });
         if (authResult.data.id == ctx.request.body.id) {
-          let user = {
+          user = {
             name: authResult.data.formattedName,
             email: authResult.data.emailAddress,
             profile_picture: authResult.data.picture.data.pictureUrl,
-            birthday: '',
-            gender: '',
             profession: authResult.data.position,
             position: ctx.request.body.position,
-            events: [],
-            created_events: [],
             accessToken: `LI${ctx.request.body.accessToken}`
           };
           user = await this._userDB(user);
@@ -332,7 +334,7 @@ class UsersController {
           !ctx.request.body.edit.position.lng ||
           !ctx.request.body.edit.position.lat
         ) {
-          ctx.status = 403;
+          ctx.status = 400;
           ctx.body = 'Missing position parameters';
           return;
         }
