@@ -73,3 +73,10 @@ Follows the [MVC](https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93contr
 |                                                         Remote MongoDb instance                                                          |                                                        Continous Deployment Tool                                                        |                                                             Exceptions Logger                                                             |
 | <img src="https://github.com/Glitches/go-for-eat-server/blob/development/assets/mLab-logo-onlight.png?raw=true" height="80" width="120"> | <img src="https://github.com/Glitches/go-for-eat-server/blob/development/assets/TravisCI-Mascot-1.png?raw=true" height="80" width="80"> | <img src="https://github.com/Glitches/go-for-eat-server/blob/development/assets/sentry-glyph-black.png?raw=true" height="80" width="120"> |
 |                                                     [mlab.com](https://www.mlab.com)                                                     |                                                     [travis-ci.org](travis-ci.org)                                                      |                                                   [sentry.io](http://sentry.io/welcome)                                                   |
+
+## Developed by:
+
+** Andrea Ceccarelli [Glitches](https://github.com/glitches)
+** Sergi Palau [Sergi Palau](https://github.com/sergipt)
+** Hannah Redler [RedSpanner](https://github.com/redspanner)
+** Leonardo DiVittorio [Leonardo](https://github.com/Leon31)

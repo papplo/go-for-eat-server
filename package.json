@@ -36,12 +36,19 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/sergipt/go-for-eat-server.git"
+    "url": "git+https://github.com/glitches/go-for-eat-server.git"
   },
-  "author": "Andrea Ceccarelli, Sergi Palau, Leonardo Di Vitorio, Hannah Redler",
+  "authors": [
+    { "name": "Andrea Ceccarelli", "url": "https://github.com/glitches" },
+    { "name": "Sergi Palau", "url": "https://github.com/sergipt" }
+  ],
+  "contributors": [
+    { "name": "Leonardo DiVittorio", "url|": "https://github.com/Leon31" },
+    { "name": "Hannah Redler", "url": "https://github.com/redspanner" }
+  ],
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/sergipt/go-for-eat-server/issues"
+    "url": "https://github.com/glitches/go-for-eat-server/issues"
   },
-  "homepage": "https://github.com/sergipt/go-for-eat-server#readme"
+  "homepage": "https://github.com/glitches/go-for-eat-server#readme"
 }
