@@ -99,7 +99,7 @@ class UsersController {
         return await this.Users.insert(userData);
       } catch (e) {
         Raven.captureException(e);
-        ctx.status = 500;
+        // ctx.status = 500;
       }
     } else {
       try {
@@ -120,7 +120,7 @@ class UsersController {
         return await this.Users.findOne({ email: userData.email });
       } catch (e) {
         Raven.captureException(e);
-        ctx.throw(500);
+        // ctx.throw(500);
       }
     }
   }
@@ -181,7 +181,7 @@ class UsersController {
         }
       } catch (e) {
         Raven.captureException(e);
-        ctx.throw(500);
+        // ctx.throw(500);
       }
     } else if (ctx.request.body.network == 'google') {
       try {
@@ -231,7 +231,7 @@ class UsersController {
         }
       } catch (e) {
         Raven.captureException(e);
-        ctx.throw(500);
+        // ctx.throw(500);
       }
     } else if (ctx.request.body.network == 'linkedin') {
       try {
@@ -270,7 +270,7 @@ class UsersController {
         }
       } catch (e) {
         Raven.captureException(e);
-        ctx.throw(500);
+        // ctx.throw(500);
       }
     }
   }
@@ -301,7 +301,7 @@ class UsersController {
       ctx.body = user;
     } catch (e) {
       Raven.captureException(e);
-      ctx.throw(500);
+      // ctx.throw(500);
     }
   }
 
@@ -373,7 +373,7 @@ class UsersController {
       ctx.status = 204;
     } catch (e) {
       Raven.captureException(e);
-      ctx.throw(500);
+      // ctx.throw(500);
     }
   }
 }

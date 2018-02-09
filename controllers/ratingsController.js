@@ -70,7 +70,7 @@ class RatingsController {
       };
     } catch (e) {
       Raven.captureException(e);
-      ctx.throw(500);
+      // ctx.throw(500);
     }
   }
 }

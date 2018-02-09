@@ -45,7 +45,7 @@ class EventsController {
       ctx.body = { event };
     } catch (e) {
       Raven.captureException(e);
-      ctx.status = 500;
+      // ctx.status = 500;
     }
   }
 
@@ -104,7 +104,7 @@ class EventsController {
       ctx.status = 204;
     } catch (e) {
       Raven.captureException(e);
-      ctx.status = 500;
+      // ctx.status = 500;
     }
   }
 
@@ -143,7 +143,7 @@ class EventsController {
       ctx.body = event;
     } catch (e) {
       Raven.captureException(e);
-      ctx.throw(500);
+      // ctx.throw(500);
     }
   }
 
@@ -160,7 +160,7 @@ class EventsController {
       ctx.status = 200;
     } catch (e) {
       Raven.captureException(e);
-      ctx.throw(500);
+      // ctx.throw(500);
     }
   }
 
@@ -188,7 +188,7 @@ class EventsController {
       ctx.status = 200;
     } catch (e) {
       Raven.captureException(e);
-      ctx.throw(500);
+      // ctx.throw(500);
     }
   }
 
@@ -261,7 +261,7 @@ class EventsController {
       ctx.body = ctx.request.query.sort ? (events[0] ? events[0] : []) : events;
     } catch (e) {
       Raven.captureException(e);
-      ctx.throw(500);
+      // ctx.throw(500);
     }
   }
 }
