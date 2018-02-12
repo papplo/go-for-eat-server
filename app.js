@@ -1,6 +1,8 @@
 'use strict';
 require('dotenv').config();
 const koa = require('koa');
+const errorHandler = require('koa-better-error-handler');
+const koa404Handler = require('koa-404-handler');
 const helmet = require('koa-helmet');
 const logger = require('koa-logger');
 const cors = require('kcors');
@@ -14,6 +16,15 @@ const User = db.get('users');
 const Raven = require('raven');
 
 Raven.config(process.env.SENTRY_DSN).install();
+
+// override koa's undocumented error handler
+app.context.onerror = errorHandler;
+
+// specify that this is our api
+app.context.api = true;
+
+// use koa-404-handler
+app.use(koa404Handler);
 
 // Logger
 app

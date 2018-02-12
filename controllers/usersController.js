@@ -98,8 +98,10 @@ class UsersController {
         userData.interests = '';
         return await this.Users.insert(userData);
       } catch (e) {
-        Raven.captureException(e);
-        // ctx.status = 500;
+        Raven.captureException(e, {
+          username: ctx.user.name,
+          id: ctx.user._id
+        }); // ctx.status = 500;
       }
     } else {
       try {
@@ -119,8 +121,10 @@ class UsersController {
         );
         return await this.Users.findOne({ email: userData.email });
       } catch (e) {
-        Raven.captureException(e);
-        // ctx.throw(500);
+        Raven.captureException(e, {
+          username: ctx.user.name,
+          id: ctx.user._id
+        }); // ctx.assert(500);
       }
     }
   }
@@ -128,19 +132,19 @@ class UsersController {
   async auth (ctx, next) {
     if ('POST' != ctx.method) return await next();
     if (!ctx.request.body.position.lat) {
-      ctx.throw(400, 'Latitude coordinate not present');
+      ctx.assert(400, 'Latitude coordinate not present');
     }
     if (!ctx.request.body.position.lat) {
-      ctx.throw(400, 'Latitude coordinate not present');
+      ctx.assert(400, 'Latitude coordinate not present');
     }
     if (!ctx.request.body.position) {
-      ctx.throw(400, 'Missing position coordinates');
+      ctx.assert(400, 'Missing position coordinates');
     }
     if (
       !regexLat.test(ctx.request.body.position.lat) ||
       !regexLng.test(ctx.request.body.position.lng)
     ) {
-      ctx.throw(403, 'Bad coordinates type');
+      ctx.assert(403, 'Bad coordinates type');
     }
     if (ctx.request.body.network == 'facebook') {
       try {
@@ -180,8 +184,10 @@ class UsersController {
           }
         }
       } catch (e) {
-        Raven.captureException(e);
-        // ctx.throw(500);
+        Raven.captureException(e, {
+          username: ctx.user.name,
+          id: ctx.user._id
+        }); // ctx.assert(500);
       }
     } else if (ctx.request.body.network == 'google') {
       try {
@@ -230,8 +236,10 @@ class UsersController {
           }
         }
       } catch (e) {
-        Raven.captureException(e);
-        // ctx.throw(500);
+        Raven.captureException(e, {
+          username: ctx.user.name,
+          id: ctx.user._id
+        }); // ctx.assert(500);
       }
     } else if (ctx.request.body.network == 'linkedin') {
       try {
@@ -269,8 +277,10 @@ class UsersController {
           }
         }
       } catch (e) {
-        Raven.captureException(e);
-        // ctx.throw(500);
+        Raven.captureException(e, {
+          username: ctx.user.name,
+          id: ctx.user._id
+        }); // ctx.assert(500);
       }
     }
   }
@@ -300,20 +310,22 @@ class UsersController {
       ctx.status = 200;
       ctx.body = user;
     } catch (e) {
-      Raven.captureException(e);
-      // ctx.throw(500);
+      Raven.captureException(e, {
+        username: ctx.user.name,
+        id: ctx.user._id
+      }); // ctx.assert(500);
     }
   }
 
   async me (ctx, next) {
     if ('GET' != ctx.method) return await next();
     if (!ctx.request.query.lat || !ctx.request.query.lng)
-      return ctx.throw(400, 'Missing coordinates');
+      return ctx.assert(400, 'Missing coordinates');
     if (
       !regexLat.test(ctx.request.query.lat) ||
       !regexLng.test(ctx.request.query.lng)
     )
-      return ctx.throw(403, 'Bad coordinates type');
+      return ctx.assert(403, 'Bad coordinates type');
     const position = {
       lat: Number(ctx.request.query.lat),
       lng: Number(ctx.request.query.lng)
@@ -354,13 +366,13 @@ class UsersController {
           !ctx.request.body.edit.position.lng ||
           !ctx.request.body.edit.position.lat
         ) {
-          ctx.throw(400, 'Missing coordinates');
+          ctx.assert(400, 'Missing coordinates');
         }
         if (
           !regexLat.test(ctx.request.body.edit.position.lat) ||
           !regexLng.test(ctx.request.body.edit.position.lng)
         ) {
-          ctx.throw(403, 'Bad coordinates type');
+          ctx.assert(403, 'Bad coordinates type');
         }
         update.$set.position;
       }
@@ -372,8 +384,10 @@ class UsersController {
       ctx.body = await this.Users.findOne({ _id: ctx.user._id });
       ctx.status = 204;
     } catch (e) {
-      Raven.captureException(e);
-      // ctx.throw(500);
+      Raven.captureException(e, {
+        username: ctx.user.name,
+        id: ctx.user._id
+      }); // ctx.assert(500);
     }
   }
 }

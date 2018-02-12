@@ -69,8 +69,10 @@ class RatingsController {
         ratings_number: user.ratings_number
       };
     } catch (e) {
-      Raven.captureException(e);
-      // ctx.throw(500);
+      Raven.captureException(e, {
+        username: ctx.user.name,
+        id: ctx.user._id
+      }); // ctx.assert(500);
     }
   }
 }
