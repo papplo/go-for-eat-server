@@ -11,7 +11,7 @@ This backend supports server side Google and Facebook `OAuth2.0` authentication 
 Also serves Linkedin login web service.
 created through [Go 4 Eat app](https://github.com/redspanner/go-for-eat-client).
 
-# USE
+# Usage
 
 * Make sure you have an instance of **MongoDB** working on your local machine or remote server.
 
@@ -44,10 +44,6 @@ Change the values accordingly to yours.
 
 ---
 
-Follows the [MVC](https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93controller) pattern.
-
----
-
 ## API tester
 
 * [Postman collection](https://www.getpostman.com/collections/fe388c40163fa169bada)
@@ -60,11 +56,6 @@ Follows the [MVC](https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93contr
 * **dotenv** - [Loads enviromnet variables from .env for nodejs projects](https://github.com/motdotla/dotenv)
 * **Axios** - [Promise client for node.js](https://github.com/axios/axios)
 * **Koa** - [Web framework for node.js](http://koajs.com/)
-  * **Koa Helmet** - [Important security headers for Koa](https://github.com/venables/koa-helmet)
-  * **Kcors** - CORS handler
-  * **Koa-bodyparser** - [A body parser for koa, base on co-body.](https://github.com/koajs/bodyparser)
-  * **Koa-logger** - [Development style loggin middleware](https://github.com/koajs/logger)
-  * **Koa-compress** - [Compress middleware for Koa](https://github.com/koajs/compress)
 
 ## External resources
 
