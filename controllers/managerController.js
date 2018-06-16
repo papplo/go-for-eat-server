@@ -98,21 +98,22 @@ class ManagerController {
         if (!restaurant) {
           ctx.status = 406;
           ctx.body = 'That email does not exist';
-        }
-        const match = await bcrypt.compare(password, restaurant.password);
-        if (!match) {
-          ctx.status = 401;
-          ctx.body = 'Your password does not match our records';
         } else {
-          ctx.status = 202;
-          ctx.body = {
-            'status': 'success',
-            'restaurant' : filterProps(restaurant, [
-              '_id',
-              'email',
-              'token',
-            ])
-          };
+          const match = await bcrypt.compare(password, restaurant.password);
+          if (!match) {
+            ctx.status = 401;
+            ctx.body = 'Your password does not match our records';
+          } else {
+            ctx.status = 202;
+            ctx.body = {
+              'status': 'success',
+              'restaurant' : filterProps(restaurant, [
+                '_id',
+                'email',
+                'token',
+              ])
+            };
+          }
         }
       } catch (e) {
         // Raven.captureException(e);
