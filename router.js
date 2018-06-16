@@ -14,6 +14,7 @@ const db = monk(process.env.MONGOLAB_URI);
 const Events = db.get('events');
 const Users = db.get('users');
 const Ratings = db.get('ratings');
+const Restaurants = db.get('restaurants');
 
 // Geo Indexing for MongoDb
 Events.createIndex({ location: '2dsphere' });
@@ -22,9 +23,10 @@ const eventsController = new EventsController(Events);
 const ratingsController = new RatingsController(Ratings, Users);
 // monk here is mandatory!
 const usersController = new UsersController(Users, Events, monk, Ratings);
-const managerController = new ManagerController(Events, monk);
+const managerController = new ManagerController(Restaurants, Events, monk);
 
 const authorize = async (ctx, next) => {
+  console.log(ctx.user);
   if (!ctx.user) {
     ctx.status = 401;
     return;
@@ -106,17 +108,17 @@ const routes = function (app) {
 
     // New Endpoint for manager, Basic Auth for now
     .post(
-      '/manager-login/',
+      '/manager/register/',
       managerController.createRestaurant.bind(managerController)
     )
     // get my info
     .get(
-      '/manager-login/users/:id',
+      '/manager/login/',
       managerController.getRestaurant.bind(managerController)
     )
     // edit my info
     .put(
-      '/manager-login/',
+      '/manager/:id',
       managerController.editRestaurant.bind(managerController)
     )
 
