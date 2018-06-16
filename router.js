@@ -4,6 +4,7 @@ const router = require('koa-router')();
 const UsersController = require('./controllers/usersController');
 const EventsController = require('./controllers/eventsController');
 const RatingsController = require('./controllers/ratingsController');
+const ManagerController = require('./controllers/managerController');
 
 // MongoDb configure
 const monk = require('monk');
@@ -21,6 +22,7 @@ const eventsController = new EventsController(Events);
 const ratingsController = new RatingsController(Ratings, Users);
 // monk here is mandatory!
 const usersController = new UsersController(Users, Events, monk, Ratings);
+const managerController = new ManagerController(Events, monk);
 
 const authorize = async (ctx, next) => {
   if (!ctx.user) {
@@ -31,10 +33,14 @@ const authorize = async (ctx, next) => {
   await next();
 };
 
+
 const routes = function (app) {
   router
     // Authorization
-    .post('/api/v1/auth', usersController.auth.bind(usersController))
+    .post(
+      '/api/v1/auth',
+      usersController.auth.bind(usersController)
+    )
     // Get users info
     .get(
       '/api/v1/users/:id',
@@ -42,7 +48,11 @@ const routes = function (app) {
       usersController.getUser.bind(usersController)
     )
     // Get my info
-    .get('/api/v1/me', authorize, usersController.me.bind(usersController))
+    .get(
+      '/api/v1/me',
+      authorize,
+      usersController.me.bind(usersController)
+    )
     // Modify my info
     .put(
       '/api/v1/me',
@@ -90,6 +100,30 @@ const routes = function (app) {
       authorize,
       eventsController.getEvents.bind(eventsController)
     )
+
+
+
+
+    // New Endpoint for manager, Basic Auth for now
+    .post(
+      '/manager-login/',
+      managerController.createRestaurant.bind(managerController)
+    )
+    // get my info
+    .get(
+      '/manager-login/users/:id',
+      managerController.getRestaurant.bind(managerController)
+    )
+    // edit my info
+    .put(
+      '/manager-login/',
+      managerController.editRestaurant.bind(managerController)
+    )
+
+
+
+
+
 
     .options('/', options)
     .trace('/', trace)
