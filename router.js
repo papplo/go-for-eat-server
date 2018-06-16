@@ -12,6 +12,7 @@ const db = monk(process.env.MONGOLAB_URI);
 
 // Creating Db instances
 const Events = db.get('events');
+const PartyOf = db.get('partyOf');
 const Users = db.get('users');
 const Ratings = db.get('ratings');
 const Restaurants = db.get('restaurants');
@@ -23,10 +24,9 @@ const eventsController = new EventsController(Events);
 const ratingsController = new RatingsController(Ratings, Users);
 // monk here is mandatory!
 const usersController = new UsersController(Users, Events, monk, Ratings);
-const managerController = new ManagerController(Restaurants, Events, monk);
+const managerController = new ManagerController(Restaurants, PartyOf, Events, monk);
 
 const authorize = async (ctx, next) => {
-  console.log(ctx.user);
   if (!ctx.user) {
     ctx.status = 401;
     return;
@@ -106,22 +106,26 @@ const routes = function (app) {
 
 
 
-    // New Endpoint for manager, Basic Auth for now
+    // create, Basic Auth for now
     .post(
       '/manager/register/',
       managerController.createRestaurant.bind(managerController)
     )
-    // get my info
+    // get my info (login)
     .get(
       '/manager/login/',
       managerController.getRestaurant.bind(managerController)
     )
     // edit my info
     .put(
-      '/manager/:id',
+      '/manager/restaurant/:id',
       managerController.editRestaurant.bind(managerController)
     )
-
+    // create new custom event
+    .post(
+      '/manager/partyof/',
+      managerController.createPartyOf.bind(managerController)
+    )
 
 
 

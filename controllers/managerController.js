@@ -12,8 +12,9 @@ const regexLng = /^[-+]?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))(\.\d+)?)$/;
 
 
 class ManagerController {
-  constructor (Restaurants, Events, monk) {
+  constructor (Restaurants, PartyOf, Events, monk) {
     this.Restaurants = Restaurants;
+    this.PartyOf = PartyOf;
     this.Events = Events;
     this.monk = monk;
   }
@@ -24,7 +25,7 @@ class ManagerController {
   async createRestaurant (ctx, next) {
     if ('POST' != ctx.method) return await next();
 
-    const { email, password, address} = ctx.request.body;
+    const { email, password, address, googlePlaceData} = ctx.request.body;
 
     const {
       id,
@@ -46,19 +47,27 @@ class ManagerController {
           email: email,
           password: hashedPass,
           token: token,
+          googlePlaceData : googlePlaceData
         });
-
+        const restaurant = await this.Restaurants.findOne({email : email});
         ctx.status = 203;
-        ctx.body = await this.Restaurants.findOne({email : email});
-
+        ctx.body = {
+          'status': 'success',
+          'method': 'basic',
+          'restaurant' : filterProps(restaurant, [
+            '_id',
+            'email',
+            'token',
+            'googlePlaceData',
+          ])
+        };
       } else {
         ctx.status = 400;
         ctx.body = 'User with email already exists';
       }
 
     } catch (e) {
-      // Raven.captureException(e);
-      console.log(e);
+      Raven.captureException(e);
       ctx.status = 500;
     }
   }
@@ -79,10 +88,12 @@ class ManagerController {
         } else {
           ctx.body = {
             'status': 'success',
+            'method': 'token',
             'restaurant' : filterProps(restaurant, [
               '_id',
               'email',
               'token',
+              'googlePlaceData',
             ])
           };
         }
@@ -107,17 +118,18 @@ class ManagerController {
             ctx.status = 202;
             ctx.body = {
               'status': 'success',
+              'method': 'basic',
               'restaurant' : filterProps(restaurant, [
                 '_id',
                 'email',
                 'token',
+                'googlePlaceData',
               ])
             };
           }
         }
       } catch (e) {
-        // Raven.captureException(e);
-        console.log(e);
+        Raven.captureException(e);
         ctx.status = 500;
       }
 
@@ -126,12 +138,54 @@ class ManagerController {
 
   async editRestaurant (ctx, next) {
     if ('PUT' != ctx.method) return await next();
+  }
+
+  async createPartyOf (ctx, next) {
+    if ('POST' != ctx.method) return await next();
+
+    // middleware to come....
+    ctx.user = ctx.headers.authorization.split(' ').pop();
+
+    const newPartyOf = {
+      party_of_title: ctx.request.body.party_of_title,
+      offer: ctx.request.body.offer,
+      party_cipanti: ctx.request.body.party_cipanti,
+      place_id: ctx.request.body.place_id,
+      place_name: ctx.request.body.place_name,
+      place_address: ctx.request.body.place_address,
+      location: ctx.request.body.location,
+      place_url: ctx.request.body.place_url ? ctx.request.body.place_url : '',
+      when: ctx.request.body.when,
+      creator: ctx.user,
+      attendees: []
+    };
     try {
-      ctx.status = 200;
-      ctx.body = 'Hello Worldz';
+      // for (const key in newPartyOf) {
+      //   if (!newPartyOf[key]) return (ctx.status = 400);
+      // }
+      if (
+        !ctx.request.body.location.coordinates[1] ||
+        !ctx.request.body.location.coordinates[0]
+      )
+        return (ctx.status = 400);
+      if (
+        !regexLat.test(ctx.request.body.location.coordinates[1]) ||
+        !regexLng.test(ctx.request.body.location.coordinates[0])
+      )
+        return (ctx.status = 400);
+      const PartyOf = await this.PartyOf.insert(newPartyOf);
+      ctx.status = 201;
+      ctx.body = { PartyOf };
     } catch (e) {
-      console.log(e);
+      Raven.captureException(e);
+      ctx.status = 500;
     }
+  }
+
+
+  async _fetchCreatedEvents (ctx, next) {
+    if ('GET' != ctx.method) return await next();
+
   }
 
   async _auth (ctx, next) {
@@ -139,10 +193,6 @@ class ManagerController {
     console.log(ctx.request.body);
     ctx.body = 'welcome';
   }
-  async _fetchCreatedEvents (ctx, next) {}
-  async _fetchAttendedEvents (ctx, next) {}
-  async _notYet (ctx, next) {}
-
 
 }
 
