@@ -121,10 +121,16 @@ const routes = function (app) {
       '/manager/restaurant/:id',
       managerController.editRestaurant.bind(managerController)
     )
+
     // create new custom event
     .post(
       '/manager/partyof/',
       managerController.createPartyOf.bind(managerController)
+    )
+    // get all custom event
+    .get(
+      '/manager/partyof/',
+      managerController.getAllPartyOf.bind(managerController)
     )
 
 

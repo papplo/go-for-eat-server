@@ -76,7 +76,7 @@ class ManagerController {
     if ('GET' != ctx.method) return await next();
 
     const token = ctx.request.header.authorization;
-    const { email, password} = ctx.request.header;
+    const { email, password } = ctx.request.header;
 
     if (token) {
       try {
@@ -173,6 +173,7 @@ class ManagerController {
         !regexLng.test(ctx.request.body.location.coordinates[0])
       )
         return (ctx.status = 400);
+
       const PartyOf = await this.PartyOf.insert(newPartyOf);
       ctx.status = 201;
       ctx.body = { PartyOf };
@@ -183,8 +184,29 @@ class ManagerController {
   }
 
 
-  async _fetchCreatedEvents (ctx, next) {
+  async getAllPartyOf (ctx, next) {
     if ('GET' != ctx.method) return await next();
+
+    // middleware to come....
+    const tokenClean = ctx.headers.authorization.split(' ').pop();
+
+    const restaurant = await this.Restaurants.findOne({ token: tokenClean });
+    if (restaurant) {
+      const PartyOf = await this.PartyOf.find({ creator: tokenClean });
+      if (PartyOf) {
+        ctx.status = 200;
+        console.log(PartyOf.length + ' Parties of Found!');
+        ctx.body = PartyOf;
+      }
+      else {
+        ctx.status = 400;
+        ctx.body = 'No Parties Of found, get started now!'
+      }
+    }
+    else {
+      ctx.status = 400;
+      ctx.body = 'User not authenticated';
+    }
 
   }
 
