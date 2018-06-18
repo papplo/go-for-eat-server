@@ -135,8 +135,6 @@ const routes = function (app) {
 
 
 
-
-
     .options('/', options)
     .trace('/', trace)
     .head('/', head);

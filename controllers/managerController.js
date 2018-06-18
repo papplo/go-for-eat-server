@@ -183,7 +183,6 @@ class ManagerController {
     }
   }
 
-
   async getAllPartyOf (ctx, next) {
     if ('GET' != ctx.method) return await next();
 
@@ -193,14 +192,13 @@ class ManagerController {
     const restaurant = await this.Restaurants.findOne({ token: tokenClean });
     if (restaurant) {
       const PartyOf = await this.PartyOf.find({ creator: tokenClean });
-      if (PartyOf) {
+      if (PartyOf.length > 0) {
         ctx.status = 200;
-        console.log(PartyOf.length + ' Parties of Found!');
         ctx.body = PartyOf;
       }
       else {
         ctx.status = 400;
-        ctx.body = 'No Parties Of found, get started now!'
+        ctx.body = 'No Parties Of found, get started now!';
       }
     }
     else {
