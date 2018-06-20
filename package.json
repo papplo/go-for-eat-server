@@ -1,19 +1,23 @@
 {
   "name": "go-for-eat-server",
-  "version": "1.0.0",
+  "version": "0.8.0",
   "description": "Go 4 eat server",
   "main": "app.js",
   "dependencies": {
     "axios": "^0.17.1",
+    "bcrypt": "^2.0.1",
     "dotenv": "^4.0.0",
     "kcors": "^2.2.1",
     "koa": "^2.4.1",
     "koa-bodyparser": "^4.2.0",
     "koa-compress": "^2.0.0",
+    "koa-helmet": "^3.3.0",
     "koa-logger": "^3.1.0",
     "koa-router": "^7.3.0",
     "lodash": "^4.17.4",
-    "monk": "^6.0.5"
+    "monk": "^6.0.5",
+    "raven": "^2.4.0",
+    "uuidv4": "^1.0.1"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
@@ -28,7 +32,8 @@
   },
   "scripts": {
     "start": "nodemon server.js",
-    "test": "jest"
+    "test": "jest",
+    "eslint": "eslint *.js"
   },
   "repository": {
     "type": "git",
