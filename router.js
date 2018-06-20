@@ -105,7 +105,7 @@ const routes = function (app) {
 
 
 
-
+    // testing heroku
     // create, Basic Auth for now
     .post(
       '/manager/register/',
